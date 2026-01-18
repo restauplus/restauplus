@@ -27,6 +27,7 @@ const item = {
 
 interface DashboardStats {
     totalRevenue: number;
+    weeklyTotalRevenue: number;
     activeOrders: number;
     activeTables: number;
     totalOrdersToday: number;
@@ -121,8 +122,8 @@ export function DashboardUI({ stats }: { stats: DashboardStats }) {
                         <CardHeader>
                             <CardTitle className="flex items-center justify-between">
                                 <div className="flex flex-col gap-1">
-                                    <span className="text-2xl font-bold">$2,324.00</span>
-                                    <span className="text-sm font-medium text-zinc-400">Total Growth</span>
+                                    <span className="text-2xl font-bold">${stats.weeklyTotalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    <span className="text-sm font-medium text-zinc-400">Total Growth (Last 7 Days)</span>
                                 </div>
                                 <div className="flex gap-2">
                                     <Button size="sm" variant="ghost" className="text-teal-400 hover:text-teal-300 hover:bg-teal-950/30">Month</Button>
@@ -187,7 +188,7 @@ export function DashboardUI({ stats }: { stats: DashboardStats }) {
                                     <div key={i} className="flex flex-col gap-2 p-3 rounded-lg hover:bg-zinc-800/50 transition-colors">
                                         <div className="flex justify-between items-center">
                                             <span className="font-semibold text-zinc-200">{item.name}</span>
-                                            <span className="font-bold text-teal-400">${(item.count * 12).toFixed(2)}</span>
+                                            <span className="font-bold text-teal-400">${item.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         </div>
                                         <div className="flex justify-between items-center text-xs">
                                             <span className={cn(

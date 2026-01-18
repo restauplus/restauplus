@@ -41,11 +41,11 @@ export function AdminHeaderActions() {
                 <DropdownMenuContent align="end" className="w-56 bg-zinc-950 border-white/10 text-white z-50">
                     <DropdownMenuLabel>System Shortcuts</DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-white/10" />
-                    <DropdownMenuItem className="gap-2 cursor-pointer focus:bg-white/10">
+                    <DropdownMenuItem onClick={() => router.push('/dashboard/admin/health')} className="gap-2 cursor-pointer focus:bg-white/10">
                         <ServerCrash className="w-4 h-4 text-emerald-400" />
                         System Status
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="gap-2 cursor-pointer focus:bg-white/10">
+                    <DropdownMenuItem onClick={() => router.push('/dashboard/admin/billing')} className="gap-2 cursor-pointer focus:bg-white/10">
                         <CreditCard className="w-4 h-4 text-purple-400" />
                         Billing Overview
                     </DropdownMenuItem>

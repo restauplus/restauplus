@@ -10,7 +10,7 @@ export default function AdminLayout({
             {/* Admin Sidebar */}
             <AdminSidebar />
 
-            <main className="flex-1 md:ml-72 min-h-screen flex flex-col relative z-0">
+            <main className="flex-1 md:ml-72 min-h-screen flex flex-col relative z-0 overflow-x-hidden">
                 {children}
             </main>
         </div>

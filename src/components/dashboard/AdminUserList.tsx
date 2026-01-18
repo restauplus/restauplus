@@ -103,78 +103,80 @@ export function AdminUserList({ initialProfiles }: AdminUserListProps) {
             </div>
 
             {/* List */}
-            <div className="bg-zinc-900/40 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-sm">
-                <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/5 bg-white/5 text-xs font-bold uppercase tracking-wider text-zinc-500">
-                    <div className="col-span-5 md:col-span-4">User Details</div>
-                    <div className="hidden md:block col-span-3">Role & Status</div>
-                    <div className="hidden md:block col-span-3">Restaurant</div>
-                    <div className="col-span-7 md:col-span-2 text-right">Actions</div>
-                </div>
+            <div className="bg-zinc-900/40 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-sm overflow-x-auto no-scrollbar">
+                <div className="min-w-[800px]">
+                    <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/5 bg-white/5 text-xs font-bold uppercase tracking-wider text-zinc-500">
+                        <div className="col-span-5 md:col-span-4">User Details</div>
+                        <div className="hidden md:block col-span-3">Role & Status</div>
+                        <div className="hidden md:block col-span-3">Restaurant</div>
+                        <div className="col-span-7 md:col-span-2 text-right">Actions</div>
+                    </div>
 
-                <div className="divide-y divide-white/5">
-                    {filteredProfiles.map((profile: any) => {
-                        const restaurant = Array.isArray(profile.restaurant) ? profile.restaurant[0] : profile.restaurant;
+                    <div className="divide-y divide-white/5">
+                        {filteredProfiles.map((profile: any) => {
+                            const restaurant = Array.isArray(profile.restaurant) ? profile.restaurant[0] : profile.restaurant;
 
-                        const profileForActions = {
-                            ...profile,
-                            restaurant_id: restaurant?.id,
-                            restaurant_name: restaurant?.name,
-                            restaurant_slug: restaurant?.slug,
-                            restaurant_is_active: restaurant?.is_active
-                        };
+                            const profileForActions = {
+                                ...profile,
+                                restaurant_id: restaurant?.id,
+                                restaurant_name: restaurant?.name,
+                                restaurant_slug: restaurant?.slug,
+                                restaurant_is_active: restaurant?.is_active
+                            };
 
-                        return (
-                            <div key={profile.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/[0.02] transition-colors group animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                <div className="col-span-5 md:col-span-4 flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-zinc-800 to-black border border-white/10 flex items-center justify-center font-bold text-zinc-400 group-hover:text-white group-hover:border-purple-500/50 transition-all shadow-lg shadow-black/50">
-                                        {profile.full_name?.charAt(0).toUpperCase() || '?'}
-                                    </div>
-                                    <div className="overflow-hidden">
-                                        <p className="font-bold text-white truncate">{profile.full_name || 'No Name'}</p>
-                                        <div className="flex items-center gap-1 text-xs text-zinc-500 truncate">
-                                            <Mail className="w-3 h-3" />
-                                            {profile.email}
+                            return (
+                                <div key={profile.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/[0.02] transition-colors group animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                    <div className="col-span-5 md:col-span-4 flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-zinc-800 to-black border border-white/10 flex items-center justify-center font-bold text-zinc-400 group-hover:text-white group-hover:border-purple-500/50 transition-all shadow-lg shadow-black/50">
+                                            {profile.full_name?.charAt(0).toUpperCase() || '?'}
+                                        </div>
+                                        <div className="overflow-hidden">
+                                            <p className="font-bold text-white truncate">{profile.full_name || 'No Name'}</p>
+                                            <div className="flex items-center gap-1 text-xs text-zinc-500 truncate">
+                                                <Mail className="w-3 h-3" />
+                                                {profile.email}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div className="hidden md:block col-span-3">
-                                    <div className="flex flex-col items-start gap-1">
-                                        <Badge variant="outline" className={`text-xs border-white/10 bg-black/50 ${profile.role === 'admin' ? 'text-purple-400 border-purple-500/30' : 'text-zinc-300'}`}>
-                                            {profile.role.toUpperCase()}
-                                        </Badge>
-                                        {profile.status === 'pending' && <span className="text-[10px] text-orange-400 font-bold flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" /> Pending Approval</span>}
-                                        {profile.status === 'active' && <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active</span>}
-                                        {profile.status === 'rejected' && <span className="text-[10px] text-red-400 font-bold flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-500" /> Revoked</span>}
+                                    <div className="hidden md:block col-span-3">
+                                        <div className="flex flex-col items-start gap-1">
+                                            <Badge variant="outline" className={`text-xs border-white/10 bg-black/50 ${profile.role === 'admin' ? 'text-purple-400 border-purple-500/30' : 'text-zinc-300'}`}>
+                                                {profile.role.toUpperCase()}
+                                            </Badge>
+                                            {profile.status === 'pending' && <span className="text-[10px] text-orange-400 font-bold flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" /> Pending Approval</span>}
+                                            {profile.status === 'active' && <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active</span>}
+                                            {profile.status === 'rejected' && <span className="text-[10px] text-red-400 font-bold flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-500" /> Revoked</span>}
+                                        </div>
+                                    </div>
+
+                                    <div className="hidden md:block col-span-3">
+                                        {restaurant ? (
+                                            <div className="flex items-center gap-2 text-zinc-400 group-hover:text-zinc-300 transition-colors">
+                                                <Store className={`w-4 h-4 ${restaurant.is_active === false ? 'text-red-500' : 'text-zinc-500'}`} />
+                                                <span className={`text-sm ${restaurant.is_active === false ? 'text-red-400 line-through' : ''}`}>
+                                                    {restaurant.name}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <span className="text-zinc-700 text-sm italic">No Restaurant</span>
+                                        )}
+                                    </div>
+
+                                    <div className="col-span-7 md:col-span-2 flex justify-end">
+                                        <AdminActions profile={profileForActions} />
                                     </div>
                                 </div>
+                            );
+                        })}
 
-                                <div className="hidden md:block col-span-3">
-                                    {restaurant ? (
-                                        <div className="flex items-center gap-2 text-zinc-400 group-hover:text-zinc-300 transition-colors">
-                                            <Store className={`w-4 h-4 ${restaurant.is_active === false ? 'text-red-500' : 'text-zinc-500'}`} />
-                                            <span className={`text-sm ${restaurant.is_active === false ? 'text-red-400 line-through' : ''}`}>
-                                                {restaurant.name}
-                                            </span>
-                                        </div>
-                                    ) : (
-                                        <span className="text-zinc-700 text-sm italic">No Restaurant</span>
-                                    )}
-                                </div>
-
-                                <div className="col-span-7 md:col-span-2 flex justify-end">
-                                    <AdminActions profile={profileForActions} />
-                                </div>
+                        {filteredProfiles.length === 0 && (
+                            <div className="p-8 text-center text-zinc-500 py-12">
+                                <Search className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                                <p>No users found matching your filters</p>
                             </div>
-                        );
-                    })}
-
-                    {filteredProfiles.length === 0 && (
-                        <div className="p-8 text-center text-zinc-500 py-12">
-                            <Search className="w-8 h-8 mx-auto mb-2 opacity-20" />
-                            <p>No users found matching your filters</p>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

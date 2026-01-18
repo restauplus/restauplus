@@ -152,73 +152,62 @@ $$ LANGUAGE sql SECURITY DEFINER;
 
 
 -- 1. RESTAURANTS
--- Owners can update their own restaurant.
-CREATE POLICY "Owners can update their restaurant" ON restaurants
-  FOR UPDATE USING (
-    id IN (SELECT restaurant_id FROM profiles WHERE id = auth.uid() AND role = 'owner')
-  );
+CREATE POLICY "Admins see all, members see own" ON restaurants
+  FOR SELECT USING ( is_admin() OR id = get_my_restaurant_id() );
 
--- Everyone (authenticated) can view their own restaurant details.
-CREATE POLICY "Members can view their restaurant" ON restaurants
-  FOR SELECT USING (
-    id = get_my_restaurant_id()
-  );
+CREATE POLICY "Owners can update their restaurant" ON restaurants
+  FOR UPDATE USING ( is_admin() OR (id = get_my_restaurant_id() AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'owner')) );
   
 -- Allow public "slug" lookup? (For customer facing pages - maybe later. Start strict.)
 -- For now, strict SaaS internal access only.
 
 
 -- 2. PROFILES
--- Users can view profiles in their same restaurant.
-CREATE POLICY "View team members" ON profiles
-  FOR SELECT USING (
-    restaurant_id = get_my_restaurant_id()
-  );
+CREATE POLICY "Admins see all, members see team" ON profiles
+  FOR SELECT USING ( is_admin() OR restaurant_id = get_my_restaurant_id() OR id = auth.uid() );
 
--- Users can update their own profile.
-CREATE POLICY "Update own profile" ON profiles
-  FOR UPDATE USING (
-    id = auth.uid()
-  );
-
-
--- 3. GENERIC RLS POLICY (Apply to all operational tables)
--- Logic: A user can ALL operations on rows where `restaurant_id` matches their own `restaurant_id`.
-
+-- 3. OPERATIONAL TABLES (Isolate + Admin Bypass)
 -- CATEGORIES
+DROP POLICY IF EXISTS "Isolate categories" ON categories;
 CREATE POLICY "Isolate categories" ON categories
-  USING (restaurant_id = get_my_restaurant_id())
-  WITH CHECK (restaurant_id = get_my_restaurant_id());
+  USING (is_admin() OR restaurant_id = get_my_restaurant_id())
+  WITH CHECK (is_admin() OR restaurant_id = get_my_restaurant_id());
 
 -- MENU ITEMS
+DROP POLICY IF EXISTS "Isolate menu items" ON menu_items;
 CREATE POLICY "Isolate menu items" ON menu_items
-  USING (restaurant_id = get_my_restaurant_id())
-  WITH CHECK (restaurant_id = get_my_restaurant_id());
+  USING (is_admin() OR restaurant_id = get_my_restaurant_id())
+  WITH CHECK (is_admin() OR restaurant_id = get_my_restaurant_id());
 
 -- TABLES
+DROP POLICY IF EXISTS "Isolate tables" ON tables;
 CREATE POLICY "Isolate tables" ON tables
-  USING (restaurant_id = get_my_restaurant_id())
-  WITH CHECK (restaurant_id = get_my_restaurant_id());
+  USING (is_admin() OR restaurant_id = get_my_restaurant_id())
+  WITH CHECK (is_admin() OR restaurant_id = get_my_restaurant_id());
 
 -- ORDERS
+DROP POLICY IF EXISTS "Isolate orders" ON orders;
 CREATE POLICY "Isolate orders" ON orders
-  USING (restaurant_id = get_my_restaurant_id())
-  WITH CHECK (restaurant_id = get_my_restaurant_id());
+  USING (is_admin() OR restaurant_id = get_my_restaurant_id())
+  WITH CHECK (is_admin() OR restaurant_id = get_my_restaurant_id());
 
 -- ORDER ITEMS
+DROP POLICY IF EXISTS "Isolate order items" ON order_items;
 CREATE POLICY "Isolate order items" ON order_items
-  USING (restaurant_id = get_my_restaurant_id())
-  WITH CHECK (restaurant_id = get_my_restaurant_id());
+  USING (is_admin() OR restaurant_id = get_my_restaurant_id())
+  WITH CHECK (is_admin() OR restaurant_id = get_my_restaurant_id());
 
 -- CUSTOMERS
+DROP POLICY IF EXISTS "Isolate customers" ON customers;
 CREATE POLICY "Isolate customers" ON customers
-  USING (restaurant_id = get_my_restaurant_id())
-  WITH CHECK (restaurant_id = get_my_restaurant_id());
+  USING (is_admin() OR restaurant_id = get_my_restaurant_id())
+  WITH CHECK (is_admin() OR restaurant_id = get_my_restaurant_id());
 
 -- LEADS
+DROP POLICY IF EXISTS "Isolate leads" ON leads;
 CREATE POLICY "Isolate leads" ON leads
-  USING (restaurant_id = get_my_restaurant_id())
-  WITH CHECK (restaurant_id = get_my_restaurant_id());
+  USING (is_admin() OR restaurant_id = get_my_restaurant_id())
+  WITH CHECK (is_admin() OR restaurant_id = get_my_restaurant_id());
 
 
 -- =============================================
@@ -243,14 +232,20 @@ BEGIN
   VALUES (restaurant_name, restaurant_slug) 
   RETURNING id INTO new_restaurant_id;
 
-  -- 2. Create Profile for the current auth user
-  INSERT INTO profiles (id, email, full_name, restaurant_id, role)
+  -- 2. Create or Update Profile for the current auth user
+  INSERT INTO public.profiles (id, email, full_name, restaurant_id, role, status)
   VALUES (
     auth.uid(), 
     (SELECT email FROM auth.users WHERE id = auth.uid()), 
     owner_full_name, 
     new_restaurant_id, 
-    'owner'
-  );
+    'owner',
+    'pending'
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    full_name = EXCLUDED.full_name,
+    restaurant_id = EXCLUDED.restaurant_id,
+    role = 'owner';
+    -- We DON'T update status to 'pending' on conflict to avoid locking out approved users
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

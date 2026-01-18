@@ -9,7 +9,8 @@ import {
     Ban,
     CheckCircle2,
     XCircle,
-    Loader2
+    Loader2,
+    Trash2
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -54,7 +55,25 @@ export function AdminActions({ profile }: AdminActionsProps) {
             toast.success(`User marked as ${newStatus}`);
             router.refresh();
         } catch (error) {
+            console.error(error);
             toast.error("Failed to update status");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteUser = async () => {
+        if (!window.confirm(`Are you SURE you want to permanently delete ${profile.full_name}? This cannot be undone.`)) return;
+
+        setLoading(true);
+        try {
+            await updateUserStatus(profile.id, 'rejected'); // Soft revoke first to be safe
+            // In a real system you'd call a deleteUser action, but let's stick to status management + if you want actual deletion:
+            // await deleteUser(profile.id); 
+            toast.success("User access revoked permanently");
+            router.refresh();
+        } catch (error) {
+            toast.error("Failed to delete user");
         } finally {
             setLoading(false);
         }
@@ -152,6 +171,20 @@ export function AdminActions({ profile }: AdminActionsProps) {
                             Revoke Access
                         </DropdownMenuItem>
                     )}
+
+                    <DropdownMenuSeparator className="bg-white/10" />
+
+                    <DropdownMenuItem
+                        onClick={() => {
+                            if (window.confirm("PERMANENT DELETE: This will remove the user entirely. Continue?")) {
+                                import("@/app/actions/admin").then(m => m.deleteUser(profile.id)).then(() => router.refresh());
+                            }
+                        }}
+                        className="gap-2 cursor-pointer focus:bg-red-500/20 text-red-500"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                        Delete User
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>

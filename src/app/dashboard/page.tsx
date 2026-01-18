@@ -18,7 +18,11 @@ export default async function DashboardPage() {
         .single();
 
     // 3. Smart Redirect
-    if (profile?.role === 'admin' || user.email === 'admin@restauplus.com') {
+    const isAdmin = profile?.role === 'admin' ||
+        user.email === 'admin@restauplus.com' ||
+        user.email === 'admin212123@restauplus.com';
+
+    if (isAdmin) {
         redirect("/dashboard/admin");
     } else {
         redirect("/dashboard/owner");

@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" className="dark no-scrollbar" suppressHydrationWarning>
       <body className={cn(inter.className, "antialiased bg-black")} suppressHydrationWarning>
         <AuthProvider>
           {/* <SmoothScroll> */}

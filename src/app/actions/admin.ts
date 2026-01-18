@@ -8,7 +8,7 @@ export type AdminUser = {
     email: string;
     full_name: string;
     role: string;
-    status: 'active' | 'pending' | 'rejected' | 'banned';
+    status: 'active' | 'pending' | 'rejected' | 'banned' | 'approved';
     restaurant_name?: string;
     restaurant_slug?: string;
     created_at: string;
@@ -85,7 +85,8 @@ export async function updateUserStatus(userId: string, newStatus: 'active' | 're
     const { data: { user } } = await supabase.auth.getUser();
     const { data: adminProfile } = await supabase.from('profiles').select('role').eq('id', user?.id).single();
 
-    if (adminProfile?.role !== 'admin' && user?.email !== 'admin@restauplus.com') {
+    const isMasterAdmin = user?.email === 'admin@restauplus.com' || user?.email === 'admin212123@restauplus.com' || user?.email === 'bensalahbader.business@gmail.com';
+    if (adminProfile?.role !== 'admin' && !isMasterAdmin) {
         throw new Error("Unauthorized");
     }
 
@@ -107,7 +108,8 @@ export async function deleteUser(userId: string) {
     const { data: { user } } = await supabase.auth.getUser();
     const { data: adminProfile } = await supabase.from('profiles').select('role').eq('id', user?.id).single();
 
-    if (adminProfile?.role !== 'admin' && user?.email !== 'admin@restauplus.com') {
+    const isMasterAdmin = user?.email === 'admin@restauplus.com' || user?.email === 'admin212123@restauplus.com' || user?.email === 'bensalahbader.business@gmail.com';
+    if (adminProfile?.role !== 'admin' && !isMasterAdmin) {
         throw new Error("Unauthorized");
     }
 
@@ -136,7 +138,8 @@ export async function updateUserProfile(userId: string, data: { full_name: strin
     if (!user) throw new Error("Unauthorized");
 
     const { data: adminProfile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-    if (adminProfile?.role !== 'admin' && user.email !== 'admin@restauplus.com') {
+    const isMasterAdmin = user.email === 'admin@restauplus.com' || user.email === 'admin212123@restauplus.com';
+    if (adminProfile?.role !== 'admin' && !isMasterAdmin) {
         throw new Error("Unauthorized: Admin only");
     }
 

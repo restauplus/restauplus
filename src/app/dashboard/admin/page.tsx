@@ -24,7 +24,7 @@ export default async function AdminDashboardPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect("/login");
 
-    const SUPER_ADMINS = ['admin@restauplus.com', 'admin212123@restauplus.com'];
+    const SUPER_ADMINS = ['admin@restauplus.com', 'admin212123@restauplus.com', 'bensalahbader.business@gmail.com'];
 
     const { data: adminProfile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
 
