@@ -50,15 +50,15 @@ export function Sidebar({ className, mobile }: { className?: string; mobile?: bo
             className
         )}>
             {/* Logo Section */}
-            <div className="flex h-20 items-center px-6 shrink-0">
-                <Link href="/" className="flex items-center gap-3 group">
-                    <div className="p-2 rounded-xl bg-teal-500/10 text-teal-500 group-hover:bg-teal-500 group-hover:text-white transition-all duration-300">
-                        <ChefHat className="h-6 w-6" />
-                    </div>
-                    <div className="flex flex-col">
-                        <span className="text-xl font-bold tracking-tight text-white group-hover:text-teal-400 transition-colors">
-                            RESTAU+
-                        </span>
+            <div className="flex h-20 items-center px-6 shrink-0 relative z-20">
+                <Link href="/" className="flex items-center gap-3 group w-full">
+                    <div className="relative flex items-center justify-center p-2 rounded-xl transition-all duration-500 group-hover:bg-white/5 group-hover:shadow-[0_0_20px_rgba(20,184,166,0.1)] border border-transparent group-hover:border-white/5">
+                        <div className="absolute inset-0 bg-teal-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <img
+                            src="/logo.png"
+                            alt="RESTAU PLUS"
+                            className="h-10 w-auto max-w-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3"
+                        />
                     </div>
                 </Link>
             </div>

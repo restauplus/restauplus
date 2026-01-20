@@ -75,15 +75,15 @@ export function AdminSidebar({ className, mobile }: SidebarProps) {
             className
         )}>
             <div className="px-6 py-2">
-                <Link href="/dashboard/admin" className="flex items-center pl-2 mb-14">
-                    <div className="relative w-8 h-8 mr-4 bg-gradient-to-tr from-primary to-purple-500 rounded-lg flex items-center justify-center shadow-lg shadow-purple-500/20">
-                        <ShieldAlert className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                        <h1 className="text-xl font-bold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
-                            GOD MODE
-                        </h1>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-medium">Super Admin</p>
+                <Link href="/dashboard/admin" className="flex items-center pl-2 mb-10 mt-4">
+                    <img
+                        src="/logo.png"
+                        alt="RESTAU PLUS ADMIN"
+                        className="h-12 w-auto max-w-[150px] object-contain hover:opacity-90 transition-opacity"
+                    />
+                    <div className="ml-3 border-l border-white/20 pl-3">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-medium leading-none">Admin</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-medium leading-none mt-1">Panel</p>
                     </div>
                 </Link>
             </div>

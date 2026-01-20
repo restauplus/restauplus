@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -34,6 +33,7 @@ interface DashboardStats {
     chartData: any[];
     recentActivity: any[];
     topSelling: any[];
+    currency: string;
 }
 
 export function DashboardUI({ stats }: { stats: DashboardStats }) {
@@ -53,7 +53,7 @@ export function DashboardUI({ stats }: { stats: DashboardStats }) {
                         <div className="w-2 h-2 rounded-full bg-primary" />
                         <span className="text-sm text-muted-foreground">Revenue:</span>
                         <span className="text-sm font-bold text-foreground">
-                            ${payload[0].value.toLocaleString()}
+                            {stats.currency}{payload[0].value.toLocaleString()}
                         </span>
                     </div>
                 </div>
@@ -76,7 +76,7 @@ export function DashboardUI({ stats }: { stats: DashboardStats }) {
                 <motion.div variants={item} className="md:col-span-1 lg:col-span-1">
                     <StatCard
                         title="Total Revenue"
-                        value={`$${stats.totalRevenue.toLocaleString()}`}
+                        value={`${stats.currency}${stats.totalRevenue.toLocaleString()}`}
                         icon={DollarSign}
                         trend="vs last month"
                         trendUp={stats.totalRevenue > 0}
@@ -122,7 +122,7 @@ export function DashboardUI({ stats }: { stats: DashboardStats }) {
                         <CardHeader>
                             <CardTitle className="flex items-center justify-between">
                                 <div className="flex flex-col gap-1">
-                                    <span className="text-2xl font-bold">${stats.weeklyTotalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    <span className="text-2xl font-bold">{stats.currency}{stats.weeklyTotalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     <span className="text-sm font-medium text-zinc-400">Total Growth (Last 7 Days)</span>
                                 </div>
                                 <div className="flex gap-2">
@@ -154,7 +154,7 @@ export function DashboardUI({ stats }: { stats: DashboardStats }) {
                                         fontSize={12}
                                         tickLine={false}
                                         axisLine={false}
-                                        tickFormatter={(value) => `$${value}`}
+                                        tickFormatter={(value) => `${stats.currency}${value}`}
                                         dx={-10}
                                     />
                                     <Tooltip
@@ -188,7 +188,7 @@ export function DashboardUI({ stats }: { stats: DashboardStats }) {
                                     <div key={i} className="flex flex-col gap-2 p-3 rounded-lg hover:bg-zinc-800/50 transition-colors">
                                         <div className="flex justify-between items-center">
                                             <span className="font-semibold text-zinc-200">{item.name}</span>
-                                            <span className="font-bold text-teal-400">${item.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                            <span className="font-bold text-teal-400">{stats.currency}{item.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         </div>
                                         <div className="flex justify-between items-center text-xs">
                                             <span className={cn(
@@ -227,4 +227,3 @@ export function DashboardUI({ stats }: { stats: DashboardStats }) {
         </motion.div>
     );
 }
-

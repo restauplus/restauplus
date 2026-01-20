@@ -130,11 +130,13 @@ export default function RegisterPage() {
                     className="w-full max-w-md space-y-10 my-8"
                 >
                     {/* Logo */}
+
                     <Link href="/" className="inline-flex items-center gap-3 group">
-                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:scale-110 transition-transform duration-300">
-                            <IconChefHat className="w-7 h-7 text-primary" />
-                        </div>
-                        <span className="text-2xl font-bold tracking-tight text-white">Restau<span className="text-primary italic">Plus</span></span>
+                        <img
+                            src="/logo.png"
+                            alt="RESTAU PLUS"
+                            className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                        />
                     </Link>
 
                     <div className="space-y-2">

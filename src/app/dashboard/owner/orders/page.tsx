@@ -31,6 +31,15 @@ export default async function OrdersPage() {
         .neq('status', 'cancelled')
         .order('created_at', { ascending: true });
 
+    // 3. Fetch Restaurant Currency
+    const { data: restaurant } = await supabase
+        .from('restaurants')
+        .select('currency')
+        .eq('id', profile.restaurant_id)
+        .single();
+
+    const currency = restaurant?.currency || 'USD';
+
     return (
         <div className="space-y-6 pt-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -44,7 +53,7 @@ export default async function OrdersPage() {
                 </div>
             </div>
 
-            <OrderBoard initialOrders={orders || []} restaurantId={profile.restaurant_id} />
+            <OrderBoard initialOrders={orders || []} restaurantId={profile.restaurant_id} currency={currency} />
         </div>
     );
 }

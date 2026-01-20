@@ -53,7 +53,7 @@ export const Navbar = () => {
             >
                 <Link href="/" className="flex items-center gap-2 mr-2 md:mr-4">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/restau-plus-logo.png" alt="RESTAU PLUS" className="h-5 md:h-6 w-auto object-contain" />
+                    <img src="/logo.png" alt="RESTAU PLUS" className="h-10 md:h-12 w-auto max-w-[160px] md:max-w-[200px] object-contain" />
                 </Link>
                 <div className="hidden md:flex items-center gap-6 text-sm font-medium text-neutral-300">
                     <Link href="#features" className="hover:text-white transition-colors">Features</Link>

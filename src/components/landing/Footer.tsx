@@ -15,8 +15,7 @@ export function Footer() {
 
                         <div className="relative z-10 text-center space-y-8">
                             <div className="flex items-center justify-center gap-3 mb-8">
-                                <ChefHat className="h-10 w-10 text-white" />
-                                <span className="text-2xl font-bold text-white">RESTAU PLUS</span>
+                                <img src="/logo.png" alt="RESTAU PLUS" className="h-12 w-auto object-contain" />
                             </div>
 
                             <nav className="flex flex-wrap justify-center gap-8 md:gap-12">

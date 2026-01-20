@@ -7,17 +7,23 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, CheckCircle2, ChefHat, BellRing, UtensilsCrossed, User, Hash } from "lucide-react";
+import { Clock, CheckCircle2, ChefHat, BellRing, UtensilsCrossed, User, Hash, DollarSign } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-type OrderStatus = 'pending' | 'preparing' | 'ready' | 'served';
+import { OrderHistory } from "./OrderHistory";
+
+type OrderStatus = 'pending' | 'preparing' | 'ready' | 'served' | 'paid';
 
 interface Order {
     id: string;
     table_id: string | null;
     status: OrderStatus;
     created_at: string;
+    preparing_at?: string;
+    ready_at?: string;
+    served_at?: string;
+    paid_at?: string;
     customer_name?: string | null;
     table_number?: string | null;
     tables: { number: string } | null;
@@ -29,14 +35,16 @@ interface Order {
     }[];
 }
 
-export function OrderBoard({ initialOrders, restaurantId }: { initialOrders: any[], restaurantId: string }) {
+export function OrderBoard({ initialOrders, restaurantId, currency }: { initialOrders: any[], restaurantId: string, currency: string }) {
     const [orders, setOrders] = useState<Order[]>(initialOrders);
+    const [showHistory, setShowHistory] = useState(false);
     const supabase = createClient();
 
     const columns: { status: OrderStatus; label: string; icon: any; color: string; glow: string }[] = [
         { status: 'pending', label: 'New Orders', icon: BellRing, color: 'text-teal-500', glow: 'shadow-teal-500/20' },
         { status: 'preparing', label: 'Preparing', icon: ChefHat, color: 'text-orange-500', glow: 'shadow-orange-500/20' },
-        { status: 'ready', label: 'Ready to Serve', icon: CheckCircle2, color: 'text-green-500', glow: 'shadow-green-500/20' },
+        { status: 'ready', label: 'Ready to Serve', icon: CheckCircle2, color: 'text-emerald-500', glow: 'shadow-emerald-500/20' },
+        { status: 'served', label: 'Served', icon: UtensilsCrossed, color: 'text-indigo-500', glow: 'shadow-indigo-500/20' },
     ];
 
     useEffect(() => {
@@ -84,13 +92,49 @@ export function OrderBoard({ initialOrders, restaurantId }: { initialOrders: any
     }, [supabase, restaurantId]);
 
     const updateStatus = async (orderId: string, newStatus: OrderStatus) => {
-        // Optimistic UI
-        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+        const timestampField =
+            newStatus === 'preparing' ? 'preparing_at' :
+                newStatus === 'ready' ? 'ready_at' :
+                    newStatus === 'served' ? 'served_at' :
+                        newStatus === 'paid' ? 'paid_at' : null;
 
-        const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
+        const updateData: any = { status: newStatus };
+        if (timestampField) {
+            updateData[timestampField] = new Date().toISOString();
+        }
+
+        // Optimistic UI
+        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updateData } : o));
+
+        const { error } = await supabase.from('orders').update(updateData).eq('id', orderId);
+
         if (error) {
-            toast.error("Failed to update status");
-            // Revert on error?
+            // Only log as error if it's NOT a missing column issue (which we handle via retry)
+            // PGRST204 = missing column
+            const isMissingColumn = error.code === 'PGRST204' || error.message?.includes('Could not find the');
+
+            if (!isMissingColumn) {
+                console.error("Update with timestamp failed:", JSON.stringify(error));
+            }
+
+            // Fallback: Try updating STATUS ONLY (if columns are missing or type mismatch)
+            if (timestampField) {
+                const { error: retryError } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
+
+                if (!retryError) {
+                    toast.success(`Order moved to ${newStatus}`, {
+                        className: "glass-card",
+                        description: "Dashboard updated. (Timestamps skipped)"
+                    });
+                    return; // Success on retry
+                } else {
+                    console.error("Retry failed:", JSON.stringify(retryError));
+                }
+            }
+
+            toast.error(`Update failed: ${error.message || 'Unknown error'}`);
+            // Revert optimistic update on error
+            setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: o.status } : o));
         } else {
             toast.success(`Order moved to ${newStatus}`, {
                 className: "glass-card"
@@ -101,7 +145,16 @@ export function OrderBoard({ initialOrders, restaurantId }: { initialOrders: any
     return (
         <div className="flex-1 h-full overflow-hidden flex flex-col pt-2">
             <div className="flex-1 overflow-x-auto pb-4 custom-scrollbar">
-                <div className="flex gap-6 h-full min-w-[1000px] px-1">
+                <div className="flex justify-end px-6 pb-2">
+                    <Button
+                        variant="outline"
+                        onClick={() => setShowHistory(true)}
+                        className="bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 gap-2"
+                    >
+                        <Clock className="w-4 h-4" /> History
+                    </Button>
+                </div>
+                <div className="flex gap-6 h-full min-w-[1300px] px-1">
                     {columns.map(col => (
                         <div key={col.status} className="flex-1 min-w-[320px] flex flex-col gap-4">
                             {/* Column Header */}
@@ -146,6 +199,7 @@ export function OrderBoard({ initialOrders, restaurantId }: { initialOrders: any
                     ))}
                 </div>
             </div>
+            <OrderHistory open={showHistory} onOpenChange={setShowHistory} restaurantId={restaurantId} currency={currency} />
         </div>
     );
 }
@@ -220,7 +274,17 @@ function OrderCard({ order, onUpdate }: { order: Order; onUpdate: (id: string, s
                                 onClick={() => onUpdate(order.id, 'served')}
                                 className="h-8 bg-green-600 hover:bg-green-500 text-white font-medium rounded-lg shadow-sm text-xs"
                             >
-                                Complete
+                                Mark Served
+                            </Button>
+                        )}
+                        {order.status === 'served' && (
+                            <Button
+                                size="sm"
+                                onClick={() => onUpdate(order.id, 'paid')}
+                                className="h-8 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg shadow-sm text-xs w-full"
+                            >
+                                <DollarSign className="w-3 h-3 mr-1" />
+                                Paid
                             </Button>
                         )}
                     </div>
@@ -250,7 +314,34 @@ function OrderCard({ order, onUpdate }: { order: Order; onUpdate: (id: string, s
                         </div>
                     )}
                 </CardContent>
+
+                {/* Timeline Details */}
+                <div className="bg-zinc-950/50 p-4 border-t border-white/5 space-y-3">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-2">Order Timeline</p>
+                    <div className="space-y-2 relative">
+                        {/* Vertical Line */}
+                        <div className="absolute left-[5px] top-1 bottom-1 w-[2px] bg-zinc-800" />
+
+                        <TimelineItem label="Placed" time={order.created_at} active={true} />
+                        <TimelineItem label="Preparing" time={order.preparing_at} active={!!order.preparing_at || ['preparing', 'ready', 'served', 'paid'].includes(order.status)} />
+                        <TimelineItem label="Ready" time={order.ready_at} active={!!order.ready_at || ['ready', 'served', 'paid'].includes(order.status)} />
+                        <TimelineItem label="Served" time={order.served_at} active={!!order.served_at || ['served', 'paid'].includes(order.status)} />
+                    </div>
+                </div>
             </Card>
         </motion.div>
+    );
+}
+
+function TimelineItem({ label, time, active }: { label: string, time?: string, active: boolean }) {
+    if (!active && !time) return null;
+    return (
+        <div className="flex items-center gap-3 relative z-10">
+            <div className={cn("w-2.5 h-2.5 rounded-full ring-2 ring-zinc-950", active ? "bg-teal-500" : "bg-zinc-800")} />
+            <div className="flex items-center justify-between flex-1">
+                <span className={cn("text-xs font-medium", active ? "text-zinc-300" : "text-zinc-600")}>{label}</span>
+                {time && <span className="text-[10px] text-zinc-500 font-mono">{new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>}
+            </div>
+        </div>
     );
 }

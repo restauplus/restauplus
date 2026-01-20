@@ -178,6 +178,56 @@ function ProColorPicker({
     );
 }
 
+// --- Pro Currency Picker ---
+
+function ProCurrencyPicker({
+    value,
+    onChange
+}: {
+    value: string;
+    onChange: (val: string) => void;
+}) {
+    const currencies = [
+        { code: 'USD', symbol: '$', label: 'US Dollar', flag: '🇺🇸' },
+        { code: 'QAR', symbol: 'QR', label: 'Qatari Riyal', flag: '🇶🇦' },
+        { code: 'MAD', symbol: 'DH', label: 'Moroccan Dirham', flag: '🇲🇦' },
+    ];
+
+    return (
+        <div className="grid grid-cols-3 gap-3">
+            {currencies.map((currency) => (
+                <div
+                    key={currency.code}
+                    onClick={() => onChange(currency.code)}
+                    className={cn(
+                        "cursor-pointer relative overflow-hidden rounded-xl border-2 p-4 transition-all duration-300",
+                        value === currency.code
+                            ? "bg-teal-500/10 border-teal-500 shadow-[0_0_20px_rgba(20,184,166,0.2)]"
+                            : "bg-zinc-950 border-zinc-900 hover:border-zinc-800 hover:bg-zinc-900"
+                    )}
+                >
+                    <div className="flex flex-col items-center text-center gap-2">
+                        <span className="text-2xl">{currency.flag}</span>
+                        <div className="flex flex-col">
+                            <span className={cn(
+                                "font-bold text-lg",
+                                value === currency.code ? "text-teal-400" : "text-white"
+                            )}>
+                                {currency.code}
+                            </span>
+                            <span className="text-xs text-zinc-500 font-medium">{currency.label}</span>
+                        </div>
+                    </div>
+                    {value === currency.code && (
+                        <div className="absolute top-2 right-2">
+                            <div className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
+                        </div>
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+}
 
 export function SettingsClient({ restaurant }: { restaurant: any }) {
     const supabase = createClient();
@@ -200,6 +250,7 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
         seo_title: restaurant?.seo_title || "",
         seo_description: restaurant?.seo_description || "",
         brand_story: restaurant?.brand_story || "",
+        currency: restaurant?.currency || "USD",
     });
 
     const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -229,6 +280,7 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
                 seo_title: formData.seo_title,
                 seo_description: formData.seo_description,
                 brand_story: formData.brand_story,
+                currency: formData.currency,
             })
             .eq('id', restaurant.id);
 
@@ -356,6 +408,17 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
                                         />
                                         <p className="text-xs text-zinc-500">
                                             This defines your unique website link. Use lowercase letters, numbers, and dashes only.
+                                        </p>
+                                    </div>
+
+                                    <div className="grid gap-2 pt-4">
+                                        <Label className="text-zinc-300">Currency Settings</Label>
+                                        <ProCurrencyPicker
+                                            value={formData.currency}
+                                            onChange={(val) => setFormData(prev => ({ ...prev, currency: val }))}
+                                        />
+                                        <p className="text-xs text-zinc-500">
+                                            Select the currency for your menu prices and reports.
                                         </p>
                                     </div>
                                 </CardContent>
@@ -613,7 +676,7 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
                         </TabsContent>
                     </motion.div>
                 </div>
-            </Tabs>
-        </div>
+            </Tabs >
+        </div >
     );
 }

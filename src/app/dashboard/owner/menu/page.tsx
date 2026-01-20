@@ -18,6 +18,15 @@ export default async function MenuManagementPage() {
 
     const restaurantId = profile.restaurant_id;
 
+    // Fetch Restaurant Currency
+    const { data: restaurant } = await supabase
+        .from('restaurants')
+        .select('currency')
+        .eq('id', restaurantId)
+        .single();
+
+    const currency = restaurant?.currency || 'USD';
+
     // Fetch Menu Items
     const { data: menuItems } = await supabase
         .from('menu_items')
@@ -25,5 +34,5 @@ export default async function MenuManagementPage() {
         .eq('restaurant_id', restaurantId)
         .order('created_at', { ascending: false });
 
-    return <MenuGrid initialItems={menuItems || []} restaurantId={restaurantId} />;
+    return <MenuGrid initialItems={menuItems || []} restaurantId={restaurantId} currency={currency} />;
 }

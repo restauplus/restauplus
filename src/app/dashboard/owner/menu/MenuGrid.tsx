@@ -26,7 +26,7 @@ interface MenuItem {
     category_id?: string;
 }
 
-export function MenuGrid({ initialItems, restaurantId }: { initialItems: MenuItem[], restaurantId: string }) {
+export function MenuGrid({ initialItems, restaurantId, currency }: { initialItems: MenuItem[], restaurantId: string, currency: string }) {
     const [items, setItems] = useState<MenuItem[]>(initialItems);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -37,6 +37,14 @@ export function MenuGrid({ initialItems, restaurantId }: { initialItems: MenuIte
     const initialFormState = { id: "", name: "", description: "", price: "", image_url: "", is_available: true };
     const [formData, setFormData] = useState(initialFormState);
     const [isEditing, setIsEditing] = useState(false);
+
+    const getCurrencySymbol = (code: string) => {
+        if (code === 'QAR') return 'QR';
+        if (code === 'MAD') return 'DH';
+        return '$';
+    };
+
+    const currencySymbol = getCurrencySymbol(currency);
 
     const filteredItems = items.filter(item =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -61,6 +69,8 @@ export function MenuGrid({ initialItems, restaurantId }: { initialItems: MenuIte
         setIsEditing(true);
         setIsDialogOpen(true);
     };
+
+
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -251,7 +261,7 @@ export function MenuGrid({ initialItems, restaurantId }: { initialItems: MenuIte
                                         </div>
                                     )}
                                     <Badge className="absolute top-2 right-2 backdrop-blur-md bg-black/50 hover:bg-black/70 border-white/10 text-white">
-                                        ${item.price.toFixed(2)}
+                                        {currencySymbol} {item.price.toFixed(2)}
                                     </Badge>
                                 </div>
                                 <CardHeader className="p-4 pb-2">

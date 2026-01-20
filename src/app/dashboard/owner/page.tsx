@@ -151,7 +151,18 @@ export default async function DashboardPage() {
         .order('created_at', { ascending: false })
         .limit(5);
 
+    // Fetch Restaurant Details (Currency)
+    const { data: restaurant } = await supabase
+        .from('restaurants')
+        .select('currency')
+        .eq('id', restaurantId)
+        .single();
+
+    const currencyCode = restaurant?.currency || 'USD';
+    const currencySymbol = currencyCode === 'QAR' ? 'QR' : currencyCode === 'MAD' ? 'DH' : '$';
+
     const stats = {
+        currency: currencySymbol,
         totalRevenue,
         weeklyTotalRevenue,
         activeOrders: activeOrdersCount || 0,

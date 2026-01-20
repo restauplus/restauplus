@@ -43,11 +43,13 @@ export function Hero() {
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="flex flex-col items-center"
                 >
+
+
                     <motion.div
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: 0.2, duration: 0.5 }}
-                        className="mb-8 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary backdrop-blur-md shadow-lg shadow-primary/10 hover:shadow-primary/30 transition-shadow cursor-default"
+                        className="mb-6 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary backdrop-blur-md shadow-lg shadow-primary/10 hover:shadow-primary/30 transition-shadow cursor-default"
                     >
                         <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-ping"></span>
                         The Future of Dining

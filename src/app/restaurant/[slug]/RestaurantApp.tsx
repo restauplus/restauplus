@@ -39,6 +39,9 @@ export function RestaurantApp({
     const [menuItems, setMenuItems] = useState(initialMenuItems);
     const [categories, setCategories] = useState(initialCategories);
 
+    const currencyCode = currentRestaurant.currency || 'USD';
+    const currencySymbol = currencyCode === 'QAR' ? 'QR' : currencyCode === 'MAD' ? 'DH' : '$';
+
     const [cart, setCart] = useState<CartItem[]>([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -361,7 +364,7 @@ export function RestaurantApp({
                                             <div className="absolute bottom-5 left-6 right-6 flex justify-between items-end">
                                                 <h3 className="text-2xl font-black text-white line-clamp-1 drop-shadow-md">{item.name}</h3>
                                                 <Badge className="bg-white/10 backdrop-blur-md text-white border-white/20 text-lg px-3 py-1 font-bold">
-                                                    ${item.price}
+                                                    {currencySymbol}{item.price}
                                                 </Badge>
                                             </div>
                                         </div>
@@ -402,17 +405,25 @@ export function RestaurantApp({
                     >
                         <div
                             onClick={() => setIsCartOpen(true)}
-                            className="bg-primary text-white p-4 pl-5 rounded-2xl shadow-[0_20px_50px_-12px_rgba(var(--primary),0.5)] flex items-center justify-between cursor-pointer active:scale-95 transition-transform ring-1 ring-white/20"
+                            className="text-white p-4 pl-5 rounded-2xl shadow-2xl flex items-center justify-between cursor-pointer active:scale-95 transition-all ring-1 ring-white/20 relative overflow-hidden group"
+                            style={{
+                                backgroundColor: '#22c55e', // Force Green as requested
+                                boxShadow: '0 20px 40px -10px #22c55e66'
+                            }}
                         >
-                            <div className="flex items-center gap-4">
-                                <div className="bg-white/20 p-2.5 rounded-xl"><ShoppingCart className="w-6 h-6 fill-current" /></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                            <div className="relative flex items-center gap-4 z-10">
+                                <div className="bg-black/20 p-2.5 rounded-xl backdrop-blur-md border border-white/10"><ShoppingCart className="w-6 h-6 fill-white text-white" /></div>
                                 <div className="flex flex-col">
-                                    <span className="text-sm font-bold opacity-90 uppercase tracking-widest">{cartCount} items</span>
-                                    <span className="text-2xl font-black leading-none">${cartTotal.toFixed(2)}</span>
+                                    <span className="text-xs font-bold opacity-90 uppercase tracking-widest text-white/90">{cartCount} items</span>
+                                    <span className="text-2xl font-black leading-none tracking-tight shadow-black drop-shadow-sm">{currencySymbol}{cartTotal.toFixed(2)}</span>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 font-bold pr-2">
-                                Checkout <ArrowRight className="w-5 h-5 animate-pulse" />
+                            <div className="relative flex items-center gap-2 font-bold pr-2 z-10">
+                                <span className="text-lg">Checkout</span>
+                                <div className="bg-white/20 p-1.5 rounded-full group-hover:translate-x-1 transition-transform">
+                                    <ArrowRight className="w-5 h-5" />
+                                </div>
                             </div>
                         </div>
                     </motion.div>
@@ -440,7 +451,7 @@ export function RestaurantApp({
                                 <div className="flex-1 flex flex-col justify-between">
                                     <div className="flex justify-between items-start">
                                         <span className="font-bold text-lg leading-tight">{item.name}</span>
-                                        <span className="font-bold text-primary">${(item.price * item.quantity).toFixed(2)}</span>
+                                        <span className="font-bold text-primary">{currencySymbol}{(item.price * item.quantity).toFixed(2)}</span>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <div className="flex items-center gap-0 bg-black/50 rounded-lg p-0.5 border border-white/10">
@@ -493,7 +504,7 @@ export function RestaurantApp({
                             className="w-full h-14 bg-primary hover:bg-primary/90 text-white text-lg font-black rounded-xl shadow-lg shadow-primary/20 flex items-center justify-between px-6"
                         >
                             <span>Send Order</span>
-                            {loading ? <Sparkles className="animate-spin" /> : <span>${cartTotal.toFixed(2)}</span>}
+                            {loading ? <Sparkles className="animate-spin" /> : <span>{currencySymbol}{cartTotal.toFixed(2)}</span>}
                         </Button>
                     </div>
                 </SheetContent>
@@ -587,9 +598,7 @@ export function RestaurantApp({
 
                         <a href="https://restau-plus.com" target="_blank" className="group flex items-center gap-2 px-4 py-2 rounded-full bg-black border border-white/10 hover:border-primary/50 transition-all">
                             <span className="text-zinc-500 text-xs font-bold uppercase tracking-wider group-hover:text-zinc-300">Powered by</span>
-                            <span className="text-white font-black tracking-tight flex items-center gap-1 group-hover:text-primary transition-colors">
-                                Restau<span className="text-primary">+</span>
-                            </span>
+                            <img src="/logo.png" alt="RESTAU PLUS" className="h-5 w-auto object-contain opacity-70 group-hover:opacity-100 transition-opacity" />
                         </a>
                     </div>
                 </div>
