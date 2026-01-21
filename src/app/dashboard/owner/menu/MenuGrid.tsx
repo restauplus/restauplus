@@ -230,50 +230,69 @@ export function MenuGrid({ initialItems, categories, restaurantId, currency }: {
             </div>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>{isEditing ? "Edit Item" : "New Creation"}</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="name" className="text-right">Name</Label>
-                            <Input id="name" className="col-span-3" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="price" className="text-right">Price</Label>
-                            <div className="col-span-3 flex gap-2">
-                                <div className="relative flex-1">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">
-                                        {currencySymbol}
-                                    </span>
-                                    <Input
-                                        id="price"
-                                        type="number"
-                                        className="pl-8"
-                                        value={formData.price}
-                                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                                    />
-                                </div>
-                                <select
-                                    className="w-32 h-10 px-3 rounded-md border border-input bg-background/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                                    value={selectedCurrency}
-                                    onChange={(e) => setSelectedCurrency(e.target.value)}
-                                >
-                                    <option value="USD">USD ($)</option>
-                                    <option value="MAD">MAD (DH)</option>
-                                    <option value="QAR">QAR (QR)</option>
-                                </select>
+                <DialogContent className="sm:max-w-xl bg-zinc-950/95 backdrop-blur-xl border-zinc-800/50 text-zinc-100 shadow-2xl shadow-black/80 p-0 overflow-hidden gap-0 ring-1 ring-white/10">
+                    <DialogHeader className="px-6 py-5 border-b border-zinc-800/50 bg-zinc-900/20">
+                        <DialogTitle className="text-xl font-bold tracking-tight flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                                {isEditing ? <Edit2 className="w-5 h-5 text-emerald-500" /> : <Plus className="w-5 h-5 text-emerald-500" />}
                             </div>
+                            <span className="font-display">{isEditing ? "Edit Creation" : "New Creation"}</span>
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    <div className="p-6 space-y-6">
+                        {/* Name Input */}
+                        <div className="space-y-2">
+                            <Label htmlFor="name" className="text-zinc-400 font-medium text-xs uppercase tracking-wider">Item Name</Label>
+                            <Input
+                                id="name"
+                                className="bg-zinc-900/50 border-zinc-800 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all h-11 text-base placeholder:text-zinc-600"
+                                placeholder="e.g. Truffle Mushroom Burger"
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            />
                         </div>
 
-                        {/* Category Selection with CREATE NEW logic */}
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label className="text-right">Category</Label>
-                            <div className="col-span-3 space-y-2">
-                                {!isCreatingCategory ? (
-                                    <div className="flex gap-2">
+                        <div className="grid grid-cols-12 gap-6">
+                            {/* Price Input with Unified Currency Select */}
+                            <div className="col-span-12 sm:col-span-5 space-y-2">
+                                <Label htmlFor="price" className="text-zinc-500 font-semibold text-[10px] uppercase tracking-widest pl-1">Price</Label>
+                                <div className="flex rounded-xl bg-zinc-900/50 border border-zinc-800 focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500 transition-all overflow-hidden h-12">
+                                    <div className="flex-1 relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-bold text-sm pointer-events-none z-10">
+                                            {currencySymbol}
+                                        </span>
+                                        <Input
+                                            id="price"
+                                            type="number"
+                                            className="pl-9 bg-transparent border-none focus:ring-0 focus:border-none h-full font-mono text-lg font-medium shadow-none text-zinc-100 placeholder:text-zinc-700"
+                                            placeholder="0.00"
+                                            value={formData.price}
+                                            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="w-px bg-zinc-800 my-2" />
+                                    <div className="relative w-24 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors">
                                         <select
-                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                            className="w-full h-full bg-transparent text-xs font-bold text-zinc-400 focus:outline-none appearance-none pl-3 pr-2 cursor-pointer hover:text-emerald-400 transition-colors text-center"
+                                            value={selectedCurrency}
+                                            onChange={(e) => setSelectedCurrency(e.target.value)}
+                                        >
+                                            <option value="USD">USD</option>
+                                            <option value="MAD">MAD</option>
+                                            <option value="QAR">QAR</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Category Selection */}
+                            <div className="col-span-12 sm:col-span-7 space-y-2">
+                                <Label className="text-zinc-500 font-semibold text-[10px] uppercase tracking-widest pl-1">Category</Label>
+                                {!isCreatingCategory ? (
+                                    <div className="relative h-12 px-0">
+                                        <select
+                                            className="flex h-full w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all appearance-none cursor-pointer hover:bg-zinc-900/80"
                                             value={formData.category_id}
                                             onChange={(e) => {
                                                 if (e.target.value === 'new') {
@@ -284,76 +303,101 @@ export function MenuGrid({ initialItems, categories, restaurantId, currency }: {
                                                 }
                                             }}
                                         >
-                                            <option value="">Select a Category...</option>
+                                            <option value="">Select Category...</option>
                                             {localCategories.map(cat => (
                                                 <option key={cat.id} value={cat.id}>{cat.name}</option>
                                             ))}
-                                            <option value="new" className="font-bold text-primary">+ Create New Category</option>
+                                            <option value="new" className="font-bold text-emerald-400 bg-zinc-900">+ New Category</option>
                                         </select>
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                                        </div>
                                     </div>
                                 ) : (
                                     <motion.div
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="flex gap-2"
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="flex gap-2 h-12"
                                     >
                                         <Input
-                                            placeholder="Enter new category name..."
+                                            placeholder="Category Name"
                                             value={newCategoryName}
                                             onChange={(e) => setNewCategoryName(e.target.value)}
                                             autoFocus
-                                            className="bg-primary/10 border-primary/50"
+                                            className="bg-zinc-900/50 border-emerald-500/50 focus:border-emerald-500 h-full rounded-xl focus:ring-emerald-500/20"
                                         />
                                         <Button
                                             size="icon"
                                             variant="ghost"
+                                            className="h-full w-12 rounded-xl hover:bg-zinc-800 hover:text-zinc-200 border border-zinc-800"
                                             onClick={() => { setIsCreatingCategory(false); setNewCategoryName(""); }}
                                         >
-                                            <X className="w-4 h-4" />
+                                            <X className="w-5 h-5" />
                                         </Button>
                                     </motion.div>
                                 )}
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="desc" className="text-right">Info</Label>
-                            <Textarea id="desc" className="col-span-3" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+                        {/* Description */}
+                        <div className="space-y-2">
+                            <Label htmlFor="desc" className="text-zinc-400 font-medium text-xs uppercase tracking-wider">Description</Label>
+                            <Textarea
+                                id="desc"
+                                className="bg-zinc-900/50 border-zinc-800 focus:ring-emerald-500/20 focus:border-emerald-500 min-h-[80px] resize-none"
+                                placeholder="Describe the ingredients, taste, and story..."
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            />
                         </div>
-                        <div className="grid grid-cols-4 items-start gap-4">
-                            <Label className="text-right mt-2">Image</Label>
-                            <div className="col-span-3 space-y-2">
-                                <div className="flex items-center gap-4">
-                                    {formData.image_url ? (
-                                        <div className="relative group rounded-lg overflow-hidden border border-border w-16 h-16 shrink-0 shadow-sm">
-                                            <img src={formData.image_url} className="w-full h-full object-cover" />
-                                            <button
-                                                onClick={() => setFormData({ ...formData, image_url: "" })}
-                                                className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                            >
-                                                <Trash2 className="w-4 h-4 text-white" />
-                                            </button>
+
+                        {/* Image Upload */}
+                        <div className="space-y-2">
+                            <Label className="text-zinc-500 font-semibold text-[10px] uppercase tracking-widest pl-1">Visual Asset</Label>
+                            <div className="border border-zinc-800/50 rounded-xl p-3 bg-zinc-900/30">
+                                <div className="flex gap-4">
+                                    {/* Preview Box */}
+                                    <div className="relative h-24 w-24 shrink-0 rounded-lg overflow-hidden border border-zinc-800 bg-black/40 flex items-center justify-center group">
+                                        {formData.image_url ? (
+                                            <>
+                                                <img src={formData.image_url} alt="Preview" className="h-full w-full object-cover" />
+                                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer" onClick={() => setFormData({ ...formData, image_url: "" })}>
+                                                    <Trash2 className="w-5 h-5 text-white/90" />
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <ImageIcon className="w-8 h-8 text-zinc-700" />
+                                        )}
+                                    </div>
+
+                                    {/* Action Area */}
+                                    <div className="flex-1 flex flex-col justify-center gap-3">
+                                        <div className="relative group">
+                                            <div className="absolute inset-0 bg-emerald-500/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            <label className="relative flex items-center justify-center gap-2 w-full h-10 rounded-lg border border-dashed border-zinc-700 hover:border-emerald-500/50 bg-zinc-900/50 text-zinc-400 hover:text-emerald-400 cursor-pointer transition-all">
+                                                <span className="text-xs font-medium">Choose Image File...</span>
+                                                <Input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    className="hidden"
+                                                    onChange={handleFileUpload}
+                                                />
+                                            </label>
                                         </div>
-                                    ) : (
-                                        <div className="w-16 h-16 shrink-0 rounded-lg border border-dashed border-border bg-muted/50 flex items-center justify-center">
-                                            <ImageIcon className="h-6 w-6 text-muted-foreground/50" />
+
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-px bg-zinc-800 flex-1" />
+                                            <span className="text-[9px] font-bold text-zinc-700 uppercase tracking-widest">OR</span>
+                                            <div className="h-px bg-zinc-800 flex-1" />
                                         </div>
-                                    )}
-                                    <div className="flex-1 space-y-2">
-                                        <Input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleFileUpload}
-                                            className="cursor-pointer file:cursor-pointer text-xs"
-                                        />
+
                                         <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-mono">URL</span>
                                             <Input
                                                 type="text"
-                                                placeholder="https://..."
+                                                placeholder="Paste image URL..."
                                                 value={formData.image_url || ""}
                                                 onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                                                className="pl-10 font-mono text-xs h-9"
+                                                className="h-9 text-xs bg-zinc-950/50 border-zinc-800 focus:border-zinc-700 rounded-lg text-zinc-400 font-mono pl-3"
                                             />
                                         </div>
                                     </div>
@@ -361,10 +405,28 @@ export function MenuGrid({ initialItems, categories, restaurantId, currency }: {
                             </div>
                         </div>
                     </div>
-                    <DialogFooter>
-                        <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleSubmit} disabled={loading} className="w-full sm:w-auto font-bold shadow-lg shadow-primary/20">
-                            {loading ? "Saving..." : "Save Changes"}
+
+                    <DialogFooter className="px-6 py-4 bg-zinc-900/40 border-t border-zinc-800/50 flex flex-col-reverse sm:flex-row gap-3">
+                        <Button
+                            variant="ghost"
+                            onClick={() => setIsDialogOpen(false)}
+                            className="text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/50 rounded-lg"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleSubmit}
+                            disabled={loading}
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-900/20 transition-all hover:scale-[1.02] active:scale-[0.98] rounded-lg px-8"
+                        >
+                            {loading ? (
+                                <span className="flex items-center gap-2">
+                                    <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                    Saving
+                                </span>
+                            ) : (
+                                "Save Item"
+                            )}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
