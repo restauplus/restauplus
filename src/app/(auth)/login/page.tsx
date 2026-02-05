@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-    IconBrandGoogle,
+
     IconArrowRight,
     IconLoader2,
     IconChefHat,
@@ -30,7 +30,7 @@ export default function LoginPage() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
-    const [googleLoading, setGoogleLoading] = useState(false)
+
     const [error, setError] = useState<string | null>(null)
     const [rememberMe, setRememberMe] = useState(false)
     const { user: authUser, isLoading: authLoading } = useAuth()
@@ -111,50 +111,7 @@ export default function LoginPage() {
         }
     }
 
-    const handleGoogleLogin = async () => {
-        setGoogleLoading(true)
-        setError(null)
-        try {
-            // We explicitly specify the current origin to handle port 3000/3001 correctly
-            const currentOrigin = window.location.origin;
 
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: `${currentOrigin}/auth/callback`,
-                    queryParams: {
-                        access_type: 'offline',
-                        prompt: 'consent',
-                    },
-                },
-            })
-
-            if (error) {
-                console.error("Google Auth Error:", error);
-                if (error.message.toLowerCase().includes('not enabled')) {
-                    setError("ACTION REQUIRED: Google Login is not enabled in your Supabase Dashboard. Check your console or the fix_guide.md.");
-                    toast.error("Supabase Config Error: Google Provider Not Enabled", { duration: 10000 });
-                } else {
-                    setError(error.message)
-                    toast.error(error.message)
-                }
-            } else if (data?.url) {
-                // FORCE window redirection if the library doesn't pick it up
-                toast.success('Handing over to Google...')
-                window.location.href = data.url;
-            } else {
-                toast.success('Redirecting to Google...')
-            }
-        } catch (err) {
-            console.error("External Connection Error:", err);
-            setError('System could not connect to Google. Check your internet or Supabase URL.')
-            toast.error('Connection failed')
-        } finally {
-            // We DON'T set loading to false here if we are about to redirect
-            // but we'll do it for safety in case of early catch
-            setTimeout(() => setGoogleLoading(false), 2000);
-        }
-    }
 
     return (
         <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-black overflow-hidden font-sans">
@@ -244,7 +201,7 @@ export default function LoginPage() {
                             <Button
                                 className="w-full h-14 bg-primary hover:bg-primary/90 text-white rounded-2xl text-lg font-bold shadow-xl shadow-primary/20 transition-all active:scale-[0.98] relative overflow-hidden group"
                                 type="submit"
-                                disabled={loading || googleLoading}
+                                disabled={loading}
                             >
                                 <AnimatePresence mode="wait">
                                     {loading ? (
@@ -275,32 +232,7 @@ export default function LoginPage() {
                         </form>
 
 
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                                <span className="w-full border-t border-white/5" />
-                            </div>
-                            <div className="relative flex justify-center text-xs uppercase tracking-[0.2em]">
-                                <span className="bg-black px-4 text-white/30 font-bold">OR</span>
-                            </div>
-                        </div>
 
-                        <div className="grid grid-cols-1 gap-4">
-                            <Button
-                                onClick={handleGoogleLogin}
-                                disabled={googleLoading || loading}
-                                variant="outline"
-                                className="w-full h-14 bg-white/5 border-white/10 hover:bg-white/10 hover:border-primary/50 text-white rounded-2xl transition-all font-bold tracking-tight text-base"
-                            >
-                                {googleLoading ? (
-                                    <IconLoader2 className="w-6 h-6 animate-spin" />
-                                ) : (
-                                    <div className="flex items-center justify-center gap-3">
-                                        <IconBrandGoogle className="w-6 h-6" />
-                                        Continue with Google
-                                    </div>
-                                )}
-                            </Button>
-                        </div>
                     </div>
 
                     <div className="space-y-4">

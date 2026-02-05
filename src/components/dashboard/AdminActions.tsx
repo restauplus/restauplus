@@ -32,6 +32,7 @@ interface AdminActionsProps {
         id: string;
         full_name: string;
         email: string;
+        phone?: string;
         role: string;
         status: string;
         restaurant_id?: string;

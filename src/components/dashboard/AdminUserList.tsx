@@ -114,14 +114,20 @@ export function AdminUserList({ initialProfiles }: AdminUserListProps) {
 
                     <div className="divide-y divide-white/5">
                         {filteredProfiles.map((profile: any) => {
-                            const restaurant = Array.isArray(profile.restaurant) ? profile.restaurant[0] : profile.restaurant;
+                            // RPC returns flattened structure, but fallback to nested for backwards compat
+                            const restaurant = profile.restaurant_id ? {
+                                id: profile.restaurant_id,
+                                name: profile.restaurant_name,
+                                slug: profile.restaurant_slug,
+                                is_active: profile.restaurant_is_active
+                            } : (Array.isArray(profile.restaurant) ? profile.restaurant[0] : profile.restaurant);
 
                             const profileForActions = {
                                 ...profile,
-                                restaurant_id: restaurant?.id,
-                                restaurant_name: restaurant?.name,
-                                restaurant_slug: restaurant?.slug,
-                                restaurant_is_active: restaurant?.is_active
+                                restaurant_id: restaurant?.id || profile.restaurant_id,
+                                restaurant_name: restaurant?.name || profile.restaurant_name,
+                                restaurant_slug: restaurant?.slug || profile.restaurant_slug,
+                                restaurant_is_active: restaurant?.is_active ?? profile.restaurant_is_active
                             };
 
                             return (

@@ -27,6 +27,7 @@ export default async function AdminRestaurantsPage() {
             *,
             owner:profiles(id, full_name, email)
         `)
+        .eq('is_active', true)
         .order('created_at', { ascending: false });
 
     return (

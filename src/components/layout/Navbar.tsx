@@ -52,14 +52,11 @@ export const Navbar = () => {
                 )}
             >
                 <Link href="/" className="flex items-center gap-2 mr-2 md:mr-4">
-                    <span className="font-extrabold text-xl md:text-2xl tracking-tighter text-white">
-                        RESTAU<span className="text-teal-500">PLUS</span>
-                    </span>
+                    <img src="/logo.png" alt="RESTAU PLUS" className="h-8 md:h-10 w-auto object-contain" />
                 </Link>
                 <div className="hidden md:flex items-center gap-6 text-sm font-medium text-neutral-300">
-                    <Link href="#features" className="hover:text-white transition-colors">Features</Link>
-                    <Link href="#demo" className="hover:text-white transition-colors">Demo</Link>
                     <Link href="#pricing" className="hover:text-white transition-colors">Pricing</Link>
+                    <Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link>
                 </div>
 
                 <div className="flex items-center gap-2 pl-2 md:pl-4 border-l border-white/10">
@@ -68,9 +65,29 @@ export const Navbar = () => {
                             Login
                         </Button>
                     </Link>
-                    <Link href="/menu/burger-co">
-                        <Button size="sm" className="rounded-full bg-white text-black hover:bg-gray-200 h-8 px-4 text-xs md:text-sm">
-                            Scan Demo
+
+                    <Link href="/register">
+                        <Button size="sm" className="hidden sm:inline-flex rounded-full bg-white text-black hover:bg-gray-200 h-8 px-4 text-xs md:text-sm font-medium transition-colors">
+                            Sign Up
+                        </Button>
+                    </Link>
+
+                    {/* Mobile: Pricing Link */}
+                    <Link href="#pricing" className="md:hidden text-xs font-medium text-neutral-300 hover:text-white mr-1 px-2">
+                        Pricing
+                    </Link>
+
+                    {/* Mobile: Login Pill */}
+                    <Link href="/dashboard/owner" className="md:hidden">
+                        <Button variant="ghost" size="sm" className="rounded-full text-neutral-300 hover:text-white hover:bg-white/10 h-8 px-3 text-xs">
+                            Login
+                        </Button>
+                    </Link>
+
+                    {/* Mobile: Sign Up Pill */}
+                    <Link href="/register" className="md:hidden">
+                        <Button size="sm" className="rounded-full bg-white text-black hover:bg-gray-200 h-8 px-3 text-xs">
+                            Sign Up
                         </Button>
                     </Link>
                 </div>

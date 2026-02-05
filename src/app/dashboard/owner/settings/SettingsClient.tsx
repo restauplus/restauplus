@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/language-context";
 
 // --- Pro Uploader Component (x100 Premium) ---
 
@@ -34,6 +35,7 @@ function ProImageUploader({
 }) {
     const inputRef = useRef<HTMLInputElement>(null);
     const [isHovering, setIsHovering] = useState(false);
+    const { t } = useLanguage();
 
     return (
         <div
@@ -65,7 +67,7 @@ function ProImageUploader({
                             className="flex flex-col items-center"
                         >
                             <Loader2 className="w-10 h-10 text-teal-400 animate-spin mb-4 drop-shadow-[0_0_10px_rgba(20,184,166,0.5)]" />
-                            <p className="text-sm font-medium text-teal-100 tracking-wide animate-pulse">OPTIMIZING...</p>
+                            <p className="text-sm font-medium text-teal-100 tracking-wide animate-pulse">{t('settingsPage.branding.optimizing')}</p>
                         </motion.div>
                     ) : currentUrl ? (
                         <motion.div
@@ -84,7 +86,7 @@ function ProImageUploader({
                             {/* Pro Overlay on Hover */}
                             <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] opacity-0 group-hover/image:opacity-100 transition-all duration-300 flex flex-col items-center justify-center rounded-xl">
                                 <span className="bg-teal-500/10 border border-teal-500/50 text-teal-100 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2 mb-2 backdrop-blur-md shadow-xl transform translate-y-4 group-hover/image:translate-y-0 transition-transform">
-                                    <Sparkles className="w-3 h-3" /> Replace Asset
+                                    <Sparkles className="w-3 h-3" /> {t('settingsPage.branding.replace')}
                                 </span>
                             </div>
                         </motion.div>
@@ -232,6 +234,7 @@ function ProCurrencyPicker({
 export function SettingsClient({ restaurant }: { restaurant: any }) {
     const supabase = createClient();
     const [loading, setLoading] = useState(false);
+    const { t } = useLanguage();
 
     const [formData, setFormData] = useState({
         name: restaurant?.name || "",
@@ -253,6 +256,8 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
         seo_description: restaurant?.seo_description || "",
         brand_story: restaurant?.brand_story || "",
         currency: restaurant?.currency || "USD",
+        opening_time: restaurant?.opening_time || "09:00",
+        closing_time: restaurant?.closing_time || "22:00",
     });
 
     const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -285,6 +290,8 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
                 seo_description: formData.seo_description,
                 brand_story: formData.brand_story,
                 currency: formData.currency,
+                opening_time: formData.opening_time,
+                closing_time: formData.closing_time,
             })
             .eq('id', restaurant.id);
 
@@ -293,7 +300,7 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
             const errorMessage = error.message || error.details || "Check your permissions or database connection.";
             toast.error(`Update failed: ${errorMessage}`);
         } else {
-            toast.success("Settings saved successfully");
+            toast.success(t('settingsPage.save') + " " + "successfully"); // Or just "Saved"
             if (cleanSlug !== formData.slug) {
                 setFormData(prev => ({ ...prev, slug: cleanSlug }));
             }
@@ -342,8 +349,8 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
         <div className="max-w-5xl mx-auto space-y-8 pb-20">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-white">Settings</h2>
-                    <p className="text-zinc-400">Manage your restaurant profile, appearance, and connectivity.</p>
+                    <h2 className="text-3xl font-bold tracking-tight text-white">{t('settingsPage.title')}</h2>
+                    <p className="text-zinc-400">{t('settingsPage.subtitle')}</p>
                 </div>
                 <Button
                     onClick={handleUpdate}
@@ -351,27 +358,27 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
                     size="lg"
                     className="min-w-[140px] bg-teal-500 hover:bg-teal-600 text-white shadow-lg shadow-teal-500/20 font-medium rounded-xl border-none transition-all active:scale-95"
                 >
-                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                    Save Changes
+                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4 rtl:ml-2 rtl:mr-0" />}
+                    {t('settingsPage.save')}
                 </Button>
             </div>
 
             <Tabs defaultValue="branding" className="w-full">
                 <TabsList className="grid w-full grid-cols-5 lg:w-[750px] h-14 p-1 bg-zinc-900 border border-zinc-800 rounded-xl">
                     <TabsTrigger value="general" className="rounded-lg data-[state=active]:bg-zinc-800 data-[state=active]:text-white text-zinc-400 hover:text-zinc-200 transition-all">
-                        <Store className="h-4 w-4 mr-2" /> General
+                        <Store className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" /> {t('settingsPage.tabs.general')}
                     </TabsTrigger>
                     <TabsTrigger value="branding" className="rounded-lg data-[state=active]:bg-zinc-800 data-[state=active]:text-white text-zinc-400 hover:text-zinc-200 transition-all">
-                        <Palette className="h-4 w-4 mr-2" /> Branding
+                        <Palette className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" /> {t('settingsPage.tabs.branding')}
                     </TabsTrigger>
                     <TabsTrigger value="contact" className="rounded-lg data-[state=active]:bg-zinc-800 data-[state=active]:text-white text-zinc-400 hover:text-zinc-200 transition-all">
-                        <Phone className="h-4 w-4 mr-2" /> Contact
+                        <Phone className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" /> {t('settingsPage.tabs.contact')}
                     </TabsTrigger>
                     <TabsTrigger value="marketing" className="rounded-lg data-[state=active]:bg-zinc-800 data-[state=active]:text-white text-zinc-400 hover:text-zinc-200 transition-all">
-                        <TrendingUp className="h-4 w-4 mr-2" /> Marketing
+                        <TrendingUp className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" /> {t('settingsPage.tabs.marketing')}
                     </TabsTrigger>
                     <TabsTrigger value="qrcode" className="rounded-lg data-[state=active]:bg-zinc-800 data-[state=active]:text-white text-zinc-400 hover:text-zinc-200 transition-all">
-                        <Globe className="h-4 w-4 mr-2" /> QR Code
+                        <Globe className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" /> {t('settingsPage.tabs.qrcode')}
                     </TabsTrigger>
                 </TabsList>
 
@@ -380,49 +387,49 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
                         <TabsContent value="general">
                             <Card className="border-none bg-zinc-900 shadow-lg rounded-xl">
                                 <CardHeader>
-                                    <CardTitle className="text-xl font-bold text-white">Restaurant Profile</CardTitle>
-                                    <CardDescription className="text-zinc-400">This information is visible on your home page.</CardDescription>
+                                    <CardTitle className="text-xl font-bold text-white">{t('settingsPage.general.title')}</CardTitle>
+                                    <CardDescription className="text-zinc-400">{t('settingsPage.general.desc')}</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
                                     <div className="grid gap-2">
-                                        <Label className="text-zinc-300">Restaurant Name</Label>
+                                        <Label className="text-zinc-300 rtl:text-start">{t('settingsPage.general.name')}</Label>
                                         <Input
                                             value={formData.name}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             className="h-11 bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500"
-                                            placeholder="e.g. The Gourmet Kitchen"
+                                            placeholder={t('settingsPage.general.namePlaceholder')}
                                         />
                                     </div>
                                     <div className="grid gap-2">
-                                        <Label className="text-zinc-300">Description</Label>
+                                        <Label className="text-zinc-300 rtl:text-start">{t('settingsPage.general.descLabel')}</Label>
                                         <Textarea
                                             value={formData.description}
                                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                             className="min-h-[80px] bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500"
-                                            placeholder="Brief tagline or description"
+                                            placeholder={t('settingsPage.general.descPlaceholder')}
                                         />
                                     </div>
                                     <div className="grid gap-2">
-                                        <Label className="text-zinc-300">Restaurant ID (Slug)</Label>
+                                        <Label className="text-zinc-300 rtl:text-start">{t('settingsPage.general.slug')}</Label>
                                         <Input
                                             value={formData.slug}
                                             onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                                            className="h-11 font-mono bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500"
-                                            placeholder="e.g. my-restaurant-name"
+                                            className="h-11 font-mono bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500 text-end rtl:text-end"
+                                            placeholder={t('settingsPage.general.slugPlaceholder')}
                                         />
-                                        <p className="text-xs text-zinc-500">
-                                            This defines your unique website link. Use lowercase letters, numbers, and dashes only.
+                                        <p className="text-xs text-zinc-500 rtl:text-start">
+                                            {t('settingsPage.general.slugHint')}
                                         </p>
                                     </div>
 
                                     <div className="grid gap-2 pt-4">
-                                        <Label className="text-zinc-300">Currency Settings</Label>
+                                        <Label className="text-zinc-300 rtl:text-start">{t('settingsPage.general.currency')}</Label>
                                         <ProCurrencyPicker
                                             value={formData.currency}
                                             onChange={(val) => setFormData(prev => ({ ...prev, currency: val }))}
                                         />
-                                        <p className="text-xs text-zinc-500">
-                                            Select the currency for your menu prices and reports.
+                                        <p className="text-xs text-zinc-500 rtl:text-start">
+                                            {t('settingsPage.general.currencyHint')}
                                         </p>
                                     </div>
                                 </CardContent>
@@ -437,18 +444,18 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
                                     <CardHeader>
                                         <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
                                             <Palette className="w-5 h-5 text-teal-500" />
-                                            Brand Colors
+                                            {t('settingsPage.branding.colorsTitle')}
                                         </CardTitle>
-                                        <CardDescription className="text-zinc-400">Customize the look and feel of your digital menu.</CardDescription>
+                                        <CardDescription className="text-zinc-400">{t('settingsPage.branding.colorsDesc')}</CardDescription>
                                     </CardHeader>
                                     <CardContent className="grid md:grid-cols-2 gap-8">
                                         <ProColorPicker
-                                            label="Primary Action Color"
+                                            label={t('settingsPage.branding.primary')}
                                             value={formData.primary_color}
                                             onChange={(val) => setFormData(prev => ({ ...prev, primary_color: val }))}
                                         />
                                         <ProColorPicker
-                                            label="Secondary Accent"
+                                            label={t('settingsPage.branding.secondary')}
                                             value={formData.secondary_color}
                                             onChange={(val) => setFormData(prev => ({ ...prev, secondary_color: val }))}
                                         />
@@ -461,30 +468,29 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
                                     <CardHeader>
                                         <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
                                             <ImageIcon className="w-5 h-5 text-teal-500" />
-                                            Visual Assets
+                                            {t('settingsPage.branding.assetsTitle')}
                                         </CardTitle>
-                                        <CardDescription className="text-zinc-400">Upload high-resolution images to showcase your brand.</CardDescription>
+                                        <CardDescription className="text-zinc-400">{t('settingsPage.branding.assetsDesc')}</CardDescription>
                                     </CardHeader>
                                     <CardContent className="space-y-10">
                                         {/* Logo Section */}
                                         <div className="flex flex-col md:flex-row gap-8 items-start">
                                             <ProImageUploader
-                                                label="Brand Logo"
-                                                description="Square PNG format recommended (512x512)"
+                                                label={t('settingsPage.branding.logo')}
+                                                description={t('settingsPage.branding.logoDesc')}
                                                 currentUrl={formData.logo_url}
                                                 onFileSelect={(e) => handleFileUpload(e, 'logo_url')}
                                                 uploading={uploadingLogo}
                                             />
                                             <div className="space-y-4 pt-2">
                                                 <div>
-                                                    <h4 className="text-white font-semibold mb-1">Your Logo</h4>
-                                                    <p className="text-zinc-500 text-sm leading-relaxed max-w-sm">
-                                                        This will appear on the top navigation bar of your digital menu and on QR codes.
-                                                        Use a transparent background for the best look.
+                                                    <h4 className="text-white font-semibold mb-1 rtl:text-start">{t('settingsPage.branding.yourLogo')}</h4>
+                                                    <p className="text-zinc-500 text-sm leading-relaxed max-w-sm rtl:text-start">
+                                                        {t('settingsPage.branding.yourLogoDesc')}
                                                     </p>
                                                 </div>
                                                 <div className="flex items-center gap-2 text-xs text-teal-500 font-medium bg-teal-500/10 w-fit px-3 py-1.5 rounded-full">
-                                                    <Check className="w-3 h-3" /> Optimized for Dark Mode
+                                                    <Check className="w-3 h-3" /> {t('settingsPage.branding.optimized')}
                                                 </div>
                                             </div>
                                         </div>
@@ -494,13 +500,13 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
                                         {/* Banner Section */}
                                         <div className="space-y-6">
                                             <div className="flex flex-col">
-                                                <h4 className="text-white font-semibold mb-1">Hero Banner</h4>
-                                                <p className="text-zinc-500 text-sm">Main background image for your landing page. (1920x1080 recommended)</p>
+                                                <h4 className="text-white font-semibold mb-1 rtl:text-start">{t('settingsPage.branding.banner')}</h4>
+                                                <p className="text-zinc-500 text-sm rtl:text-start">{t('settingsPage.branding.bannerDesc')}</p>
                                             </div>
 
                                             <ProImageUploader
-                                                label="Hero Banner"
-                                                description="Drag and drop or click to upload a high-quality cover photo"
+                                                label={t('settingsPage.branding.banner')}
+                                                description={t('settingsPage.branding.bannerUploadDesc')}
                                                 currentUrl={formData.banner_url}
                                                 onFileSelect={(e) => handleFileUpload(e, 'banner_url')}
                                                 isBanner={true}
@@ -515,32 +521,61 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
                         <TabsContent value="contact">
                             <Card className="border-none bg-zinc-900 shadow-lg mb-6 rounded-xl">
                                 <CardHeader>
-                                    <CardTitle className="text-xl font-bold text-white">Contact Information</CardTitle>
-                                    <CardDescription className="text-zinc-400">Help customers find and reach you.</CardDescription>
+                                    <CardTitle className="text-xl font-bold text-white">{t('settingsPage.contact.hoursTitle')}</CardTitle>
+                                    <CardDescription className="text-zinc-400">{t('settingsPage.contact.hoursDesc')}</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-5">
+                                    <div className="grid grid-cols-2 gap-5">
+                                        <div className="space-y-2">
+                                            <Label className="text-zinc-300 rtl:text-start">{t('settingsPage.contact.opening')}</Label>
+                                            <Input
+                                                type="time"
+                                                value={formData.opening_time}
+                                                onChange={(e) => setFormData({ ...formData, opening_time: e.target.value })}
+                                                className="h-11 bg-zinc-950 border-zinc-800 text-white focus-visible:ring-teal-500 focus-visible:border-teal-500"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-zinc-300 rtl:text-start">{t('settingsPage.contact.closing')}</Label>
+                                            <Input
+                                                type="time"
+                                                value={formData.closing_time}
+                                                onChange={(e) => setFormData({ ...formData, closing_time: e.target.value })}
+                                                className="h-11 bg-zinc-950 border-zinc-800 text-white focus-visible:ring-teal-500 focus-visible:border-teal-500"
+                                            />
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="border-none bg-zinc-900 shadow-lg mb-6 rounded-xl">
+                                <CardHeader>
+                                    <CardTitle className="text-xl font-bold text-white">{t('settingsPage.contact.infoTitle')}</CardTitle>
+                                    <CardDescription className="text-zinc-400">{t('settingsPage.contact.infoDesc')}</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-5">
                                     <div className="grid md:grid-cols-2 gap-5">
                                         <div className="space-y-2">
-                                            <Label className="text-zinc-300">Phone Number</Label>
+                                            <Label className="text-zinc-300 rtl:text-start">{t('settingsPage.contact.phone')}</Label>
                                             <Input
                                                 value={formData.phone}
                                                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                                 placeholder="+1 (555) 000-0000"
-                                                className="h-11 bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500"
+                                                className="h-11 bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500 text-left"
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label className="text-zinc-300">Public Email</Label>
+                                            <Label className="text-zinc-300 rtl:text-start">{t('settingsPage.contact.email')}</Label>
                                             <Input
                                                 value={formData.email_public}
                                                 onChange={(e) => setFormData({ ...formData, email_public: e.target.value })}
                                                 placeholder="contact@restaurant.com"
-                                                className="h-11 bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500"
+                                                className="h-11 bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500 text-left"
                                             />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Physical Address</Label>
+                                        <Label className="text-zinc-300 rtl:text-start">{t('settingsPage.contact.address')}</Label>
                                         <Textarea
                                             value={formData.address}
                                             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
@@ -553,49 +588,49 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
 
                             <Card className="border-none bg-zinc-900 shadow-lg rounded-xl">
                                 <CardHeader>
-                                    <CardTitle className="text-xl font-bold text-white">Social Media</CardTitle>
-                                    <CardDescription className="text-zinc-400">Link your social profiles to your digital menu.</CardDescription>
+                                    <CardTitle className="text-xl font-bold text-white">{t('settingsPage.contact.socialTitle')}</CardTitle>
+                                    <CardDescription className="text-zinc-400">{t('settingsPage.contact.socialDesc')}</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-5">
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Instagram URL</Label>
+                                        <Label className="text-zinc-300 rtl:text-start">{t('settingsPage.contact.instagram')}</Label>
                                         <div className="relative">
-                                            <div className="absolute left-3 top-3 text-zinc-500">
+                                            <div className="absolute left-3 rtl:right-3 rtl:left-auto top-3 text-zinc-500">
                                                 <Instagram className="w-5 h-5" />
                                             </div>
                                             <Input
                                                 value={formData.instagram_url}
                                                 onChange={(e) => setFormData({ ...formData, instagram_url: e.target.value })}
                                                 placeholder="https://instagram.com/..."
-                                                className="h-11 pl-10 bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500"
+                                                className="h-11 pl-10 rtl:pr-10 rtl:pl-3 bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500 text-left"
                                             />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Facebook URL</Label>
+                                        <Label className="text-zinc-300 rtl:text-start">{t('settingsPage.contact.facebook')}</Label>
                                         <div className="relative">
-                                            <div className="absolute left-3 top-3 text-zinc-500">
+                                            <div className="absolute left-3 rtl:right-3 rtl:left-auto top-3 text-zinc-500">
                                                 <Facebook className="w-5 h-5" />
                                             </div>
                                             <Input
                                                 value={formData.facebook_url}
                                                 onChange={(e) => setFormData({ ...formData, facebook_url: e.target.value })}
                                                 placeholder="https://facebook.com/..."
-                                                className="h-11 pl-10 bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500"
+                                                className="h-11 pl-10 rtl:pr-10 rtl:pl-3 bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500 text-left"
                                             />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Website URL</Label>
+                                        <Label className="text-zinc-300 rtl:text-start">{t('settingsPage.contact.website')}</Label>
                                         <div className="relative">
-                                            <div className="absolute left-3 top-3 text-zinc-500">
+                                            <div className="absolute left-3 rtl:right-3 rtl:left-auto top-3 text-zinc-500">
                                                 <LinkIcon className="w-5 h-5" />
                                             </div>
                                             <Input
                                                 value={formData.website_url}
                                                 onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
                                                 placeholder="https://..."
-                                                className="h-11 pl-10 bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500"
+                                                className="h-11 pl-10 rtl:pr-10 rtl:pl-3 bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500 text-left"
                                             />
                                         </div>
                                     </div>
@@ -605,39 +640,39 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
                         <TabsContent value="marketing">
                             <Card className="border-none bg-zinc-900 shadow-lg rounded-xl">
                                 <CardHeader>
-                                    <CardTitle className="text-xl font-bold text-white">Marketing & SEO</CardTitle>
-                                    <CardDescription className="text-zinc-400">Optimize your restaurant's presence on search engines and share your story.</CardDescription>
+                                    <CardTitle className="text-xl font-bold text-white">{t('settingsPage.marketing.title')}</CardTitle>
+                                    <CardDescription className="text-zinc-400">{t('settingsPage.marketing.desc')}</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
                                     <div className="grid gap-2">
-                                        <Label className="text-zinc-300">SEO Meta Title</Label>
+                                        <Label className="text-zinc-300 rtl:text-start">{t('settingsPage.marketing.seoTitle')}</Label>
                                         <Input
                                             value={formData.seo_title}
                                             onChange={(e) => setFormData({ ...formData, seo_title: e.target.value })}
                                             className="h-11 bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500"
-                                            placeholder="e.g. Best Italian Pizza in Town | The Gourmet Kitchen"
+                                            placeholder={t('settingsPage.marketing.seoTitlePlaceholder')}
                                         />
-                                        <p className="text-[10px] text-zinc-500 uppercase font-bold px-1">Appears in Google search and browser tabs.</p>
+                                        <p className="text-[10px] text-zinc-500 uppercase font-bold px-1 rtl:text-start">{t('settingsPage.marketing.seoTitleHint')}</p>
                                     </div>
                                     <div className="grid gap-2">
-                                        <Label className="text-zinc-300">SEO Meta Description</Label>
+                                        <Label className="text-zinc-300 rtl:text-start">{t('settingsPage.marketing.seoDesc')}</Label>
                                         <Textarea
                                             value={formData.seo_description}
                                             onChange={(e) => setFormData({ ...formData, seo_description: e.target.value })}
                                             className="min-h-[100px] bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500"
-                                            placeholder="Describe your restaurant for search engines..."
+                                            placeholder={t('settingsPage.marketing.seoDescPlaceholder')}
                                         />
                                     </div>
                                     <Separator className="bg-zinc-800" />
                                     <div className="grid gap-2">
-                                        <Label className="text-zinc-300">Brand Story (Why Us?)</Label>
+                                        <Label className="text-zinc-300 rtl:text-start">{t('settingsPage.marketing.story')}</Label>
                                         <Textarea
                                             value={formData.brand_story}
                                             onChange={(e) => setFormData({ ...formData, brand_story: e.target.value })}
                                             className="min-h-[150px] bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500"
-                                            placeholder="Tell your customers about your history, philosophy, or secret recipes..."
+                                            placeholder={t('settingsPage.marketing.storyPlaceholder')}
                                         />
-                                        <p className="text-[10px] text-zinc-500 uppercase font-bold px-1">This will be showcased on your public landing page.</p>
+                                        <p className="text-[10px] text-zinc-500 uppercase font-bold px-1 rtl:text-start">{t('settingsPage.marketing.storyHint')}</p>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -646,8 +681,8 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
                         <TabsContent value="qrcode">
                             <Card className="border-none bg-zinc-900 shadow-lg rounded-xl">
                                 <CardHeader>
-                                    <CardTitle className="text-xl font-bold text-white">Table QR Code</CardTitle>
-                                    <CardDescription className="text-zinc-400">Print this for your customers to scan and order.</CardDescription>
+                                    <CardTitle className="text-xl font-bold text-white">{t('settingsPage.qrcode.title')}</CardTitle>
+                                    <CardDescription className="text-zinc-400">{t('settingsPage.qrcode.desc')}</CardDescription>
                                 </CardHeader>
                                 <CardContent className="flex flex-col items-center space-y-8 py-8">
                                     <div className="bg-white p-6 rounded-2xl border-4 border-white/50 shadow-xl transform transition-transform hover:scale-105">
@@ -669,10 +704,10 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
                                     </div>
                                     <div className="flex gap-4">
                                         <Button variant="outline" onClick={() => window.print()} className="shadow-sm border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800">
-                                            <ExternalLink className="mr-2 h-4 w-4" /> Print PDF
+                                            <ExternalLink className="mr-2 h-4 w-4 rtl:ml-2 rtl:mr-0" /> {t('settingsPage.qrcode.print')}
                                         </Button>
                                         <Button onClick={() => window.location.href = restaurantUrl} className="shadow-lg shadow-teal-500/20 bg-teal-500 hover:bg-teal-600 text-white border-none">
-                                            View Live Site
+                                            {t('settingsPage.qrcode.view')}
                                         </Button>
                                     </div>
                                 </CardContent>

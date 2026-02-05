@@ -22,6 +22,8 @@ export function EditUserModal({ user, open, onOpenChange }: EditUserModalProps) 
     const router = useRouter();
     const [formData, setFormData] = useState({
         full_name: user?.full_name || "",
+        email: user?.email || "",
+        password: user?.plain_password || "",
         role: user?.role || "user",
     });
 
@@ -63,6 +65,34 @@ export function EditUserModal({ user, open, onOpenChange }: EditUserModalProps) 
                             className="col-span-3 bg-zinc-900 border-zinc-800 focus:border-purple-500/50"
                         />
                     </div>
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="email" className="text-right text-zinc-400">
+                            Email
+                        </Label>
+                        <Input
+                            id="email"
+                            type="email"
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            className="col-span-3 bg-zinc-900 border-zinc-800 focus:border-purple-500/50"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="password" className="text-right text-zinc-400">
+                            Password
+                        </Label>
+                        <Input
+                            id="password"
+                            type="text"
+                            placeholder="Set new password..."
+                            value={formData.password}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            className="col-span-3 bg-zinc-900 border-zinc-800 focus:border-purple-500/50 placeholder:text-zinc-600"
+                        />
+                    </div>
+
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="role" className="text-right text-zinc-400">
                             Role

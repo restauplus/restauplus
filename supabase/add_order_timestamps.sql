@@ -1,0 +1,6 @@
+-- Add timestamp columns for each status stage to enable detailed timeline tracking
+ALTER TABLE orders
+ADD COLUMN IF NOT EXISTS preparing_at TIMESTAMP WITH TIME ZONE,
+ADD COLUMN IF NOT EXISTS ready_at TIMESTAMP WITH TIME ZONE,
+ADD COLUMN IF NOT EXISTS served_at TIMESTAMP WITH TIME ZONE,
+ADD COLUMN IF NOT EXISTS paid_at TIMESTAMP WITH TIME ZONE;

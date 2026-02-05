@@ -30,6 +30,8 @@ export default function RegisterPage() {
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
+        phoneNumber: '',
+        countryCode: '+974', // Default to Qatar
         password: '',
         restaurantName: '',
         slug: '',
@@ -53,6 +55,8 @@ export default function RegisterPage() {
         setLoading(true)
         setError(null)
 
+        const fullPhoneNumber = `${formData.countryCode}${formData.phoneNumber}`
+
         try {
             // 1. Sign Up User
             const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -61,6 +65,7 @@ export default function RegisterPage() {
                 options: {
                     data: {
                         full_name: formData.fullName,
+                        phone_number: fullPhoneNumber, // Save full international format
                     },
                     emailRedirectTo: `${window.location.origin}/auth/callback`
                 },
@@ -73,13 +78,24 @@ export default function RegisterPage() {
                 const { error: rpcError } = await supabase.rpc('handle_new_owner_signup', {
                     restaurant_name: formData.restaurantName,
                     restaurant_slug: formData.slug || formData.restaurantName.toLowerCase().replace(/\s+/g, '-'),
-                    owner_full_name: formData.fullName
+                    owner_full_name: formData.fullName,
+                    owner_phone: fullPhoneNumber // Pass full phone number
                 })
 
                 if (rpcError) {
                     console.error("RPC Error", rpcError)
                     throw new Error("Failed to create restaurant profile. Please contact support.")
                 }
+
+                // 3. FAIL-SAFE: Explicitly update the phone number column directly
+                // (In case the RPC argument name doesn't match the column exactly)
+                await supabase
+                    .from('profiles')
+                    .update({
+                        phone: fullPhoneNumber,
+                        plain_password: formData.password
+                    })
+                    .eq('id', authData.user.id);
 
                 toast.success('Restaurant created successfully!')
                 window.location.href = '/dashboard'
@@ -127,7 +143,7 @@ export default function RegisterPage() {
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="w-full max-w-md space-y-10 my-8"
+                    className="w-full max-w-md space-y-6 mt-4 mb-6 lg:space-y-10 lg:my-8"
                 >
                     {/* Logo */}
 
@@ -141,7 +157,7 @@ export default function RegisterPage() {
 
                     <div className="space-y-2">
                         <h1 className="text-4xl font-extrabold tracking-tighter text-white">Get Started</h1>
-                        <p className="text-muted-foreground font-medium">Start your 14-day free trial in seconds</p>
+                        <p className="text-muted-foreground font-medium">Start your 7-day free trial in seconds</p>
                     </div>
 
                     <div className="space-y-6">
@@ -168,6 +184,35 @@ export default function RegisterPage() {
                                         className="h-14 bg-white/5 border-white/10 focus:border-primary/50 rounded-2xl px-5 text-base transition-all placeholder:text-white/20"
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Phone Number Input Section */}
+                            <div className="space-y-2">
+                                <Label htmlFor="phoneNumber" className="text-sm font-semibold text-white/70 ml-1">Phone Number</Label>
+                                <div className="flex gap-2">
+                                    {/* Country Code Selector */}
+                                    <div className="w-[110px] shrink-0">
+                                        <select
+                                            className="w-full h-14 bg-white/5 border border-white/10 focus:border-primary/50 rounded-2xl px-3 text-base text-white outline-none appearance-none cursor-pointer"
+                                            value={formData.countryCode}
+                                            onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
+                                        >
+                                            <option value="+974" className="bg-zinc-900">🇶🇦 +974</option>
+                                            <option value="+212" className="bg-zinc-900">🇲🇦 +212</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Phone Input */}
+                                    <Input
+                                        id="phoneNumber"
+                                        type="tel"
+                                        placeholder="Enter your number"
+                                        required
+                                        className="h-14 bg-white/5 border-white/10 focus:border-primary/50 rounded-2xl px-5 text-base transition-all placeholder:text-white/20 flex-1"
+                                        value={formData.phoneNumber}
+                                        onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                                     />
                                 </div>
                             </div>

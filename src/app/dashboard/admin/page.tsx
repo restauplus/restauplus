@@ -33,20 +33,15 @@ export default async function AdminDashboardPage() {
         redirect("/dashboard/owner");
     }
 
-    // 2. Data Fetching
-    const { data: profiles } = await supabase
-        .from('profiles')
-        .select(`
-            id, full_name, email, role, status, created_at,
-            restaurant:restaurants(id, name, slug, is_active)
-        `)
-        .order('created_at', { ascending: false });
+    // 2. Data Fetching (Using RPC to bypass schema cache issues)
+    const { data: profiles } = await supabase.rpc('get_all_profiles_with_restaurant');
 
     // 3. Stats Calculation
     const totalUsers = profiles?.length || 0;
-    const activeUsers = profiles?.filter(p => p.status === 'active' || p.status === 'approved').length || 0;
-    const pendingUsers = profiles?.filter(p => p.status === 'pending').length || 0;
-    const totalRestaurants = profiles?.filter(p => Array.isArray(p.restaurant) && p.restaurant.length > 0).length || 0;
+    const activeUsers = profiles?.filter((p: any) => p.status === 'active' || p.status === 'approved').length || 0;
+    const pendingUsers = profiles?.filter((p: any) => p.status === 'pending').length || 0;
+    // Update logic for flattened RPC response: check if restaurant_id exists
+    const totalRestaurants = profiles?.filter((p: any) => p.restaurant_id).length || 0;
 
     return (
         <div className="min-h-screen bg-black text-white p-6 md:p-10 space-y-10 animate-in fade-in duration-500">

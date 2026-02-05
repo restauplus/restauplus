@@ -7,10 +7,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
+import { AccessControlCard } from "@/components/admin/AccessControlCard";
+
 export default async function AdminSettingsPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect("/login");
+
+    // Fetch initial settings
+    const { data: settings } = await supabase
+        .from('platform_settings')
+        .select('*')
+        .eq('id', 1)
+        .single();
+
 
     return (
         <div className="min-h-screen bg-black text-white p-6 md:p-10 space-y-8">
@@ -42,39 +52,11 @@ export default async function AdminSettingsPage() {
                     </CardContent>
                 </Card>
 
-                {/* Security Settings */}
-                <Card className="bg-zinc-900/50 border-white/10">
-                    <CardHeader>
-                        <CardTitle className="text-white flex items-center gap-2">
-                            <Lock className="w-5 h-5 text-zinc-400" />
-                            Access Control
-                        </CardTitle>
-                        <CardDescription>Security and registration rules.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
-                                <Label className="text-base text-zinc-200">Allow New Registrations</Label>
-                                <p className="text-xs text-zinc-500">If disabled, no new signups allowed.</p>
-                            </div>
-                            <Switch defaultChecked />
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
-                                <Label className="text-base text-zinc-200">Auto-Approve Email Domains</Label>
-                                <p className="text-xs text-zinc-500">Auto-whitelist specific emails.</p>
-                            </div>
-                            <Switch />
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
-                                <Label className="text-base text-zinc-200">Maintenance Mode</Label>
-                                <p className="text-xs text-zinc-500">Shut down user dashboards.</p>
-                            </div>
-                            <Switch />
-                        </div>
-                    </CardContent>
-                </Card>
+                {/* Security Settings (Client Component) */}
+                <AccessControlCard initialSettings={{
+                    maintenance_mode: settings?.maintenance_mode ?? false,
+                    allow_registrations: settings?.allow_registrations ?? true
+                }} />
             </div>
         </div>
     );

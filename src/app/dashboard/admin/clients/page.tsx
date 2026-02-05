@@ -18,14 +18,19 @@ export default async function AdminClientsPage() {
         redirect("/dashboard/owner");
     }
 
-    // Fetch All User Profiles
-    const { data: profiles } = await supabase
-        .from('profiles')
-        .select(`
-            id, full_name, email, role, status, created_at,
-            restaurant:restaurants(id, name, slug, is_active)
-        `)
-        .order('created_at', { ascending: false });
+    // Fetch All User Profiles using RPC (bypasses PostgREST schema cache issues)
+    const { data: profiles, error } = await supabase.rpc('get_all_profiles_with_restaurant');
+
+    if (error) {
+        console.error('RPC Error:', error);
+    }
+
+    console.log('--- DEBUG: FETCHED PROFILES VIA RPC ---');
+    if (profiles && profiles.length > 0) {
+        console.log('First Profile:', profiles[0]);
+        console.log('First Profile Phone:', profiles[0].phone);
+    }
+    console.log('-------------------------------');
 
     return (
         <div className="min-h-screen bg-black text-white p-6 md:p-10 space-y-8 animate-in fade-in duration-500">

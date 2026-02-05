@@ -295,4 +295,13 @@
         scrollbar-width: none;
         /* Firefox */
     }
+
+    /* Force Hide Next.js Development Indicator */
+    [data-nextjs-toast],
+    nextjs-portal,
+    #nextjs-dev-tools-overlay {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
 }

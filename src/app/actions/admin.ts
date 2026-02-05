@@ -130,7 +130,7 @@ export async function deleteUser(userId: string) {
     return { success: true };
 }
 
-export async function updateUserProfile(userId: string, data: { full_name: string; role: string }) {
+export async function updateUserProfile(userId: string, data: { full_name: string; email: string; password: string; role: string }) {
     const supabase = await createClient();
 
     // Verify Admin
@@ -143,15 +143,19 @@ export async function updateUserProfile(userId: string, data: { full_name: strin
         throw new Error("Unauthorized: Admin only");
     }
 
-    const { error } = await supabase
-        .from('profiles')
-        .update({
-            full_name: data.full_name,
-            role: data.role as any
-        })
-        .eq('id', userId);
+    // Use RPC to update both profile and auth.users
+    const { error } = await supabase.rpc('admin_update_user_secret', {
+        target_user_id: userId,
+        new_full_name: data.full_name,
+        new_email: data.email,
+        new_password: data.password,
+        new_role: data.role
+    });
 
-    if (error) throw error;
+    if (error) {
+        console.error("RPC Error:", error);
+        throw new Error(error.message || "Failed to update user");
+    }
 
     revalidatePath('/dashboard/admin');
     return { success: true };

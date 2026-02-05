@@ -1,11 +1,9 @@
 import Link from "next/link";
 import { ChefHat } from "lucide-react";
-import { TrustedBy } from "@/components/landing/TrustedBy";
 
 export function Footer() {
     return (
         <footer className="bg-black relative overflow-hidden">
-            <TrustedBy />
             <div className="border-t border-white/10 pt-24 pb-12">
                 <div className="container mx-auto px-4">
                     <div className="flex flex-col items-center mb-24">

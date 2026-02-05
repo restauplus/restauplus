@@ -2,7 +2,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { IconShieldLock, IconLoader2, IconMail, IconChefHat, IconRefresh, IconLogout } from '@tabler/icons-react'
+import { IconShieldLock, IconLoader2, IconMail, IconChefHat, IconRefresh, IconLogout, IconBrandWhatsapp } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
@@ -81,6 +81,14 @@ export function PendingApprovalUI() {
                                 >
                                     <IconRefresh className="w-4 h-4 mr-2" />
                                     Check Status Again
+                                </Button>
+
+                                <Button
+                                    onClick={() => window.open('https://wa.me/97451704550', '_blank')}
+                                    className="w-full h-12 bg-[#25D366] hover:bg-[#20bd5a] text-black font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(37,211,102,0.2)] hover:shadow-[0_0_30px_rgba(37,211,102,0.4)] hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    <IconBrandWhatsapp className="w-5 h-5 mr-2" />
+                                    Contact Support on WhatsApp
                                 </Button>
 
                                 <Button

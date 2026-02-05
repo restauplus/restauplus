@@ -3,7 +3,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Info, Mail, Calendar, Hash, Store, MapPin, Globe } from "lucide-react";
+import { Info, Mail, Calendar, Hash, Store, MapPin, Globe, Phone, Lock } from "lucide-react";
 
 interface ViewDetailsModalProps {
     user: any;
@@ -38,13 +38,17 @@ export function ViewDetailsModal({ user, open, onOpenChange }: ViewDetailsModalP
                             <div className="space-y-3">
                                 <DetailItem icon={Hash} label="User ID" value={user.id} mono />
                                 <DetailItem icon={Mail} label="Email" value={user.email} />
+                                <DetailItem icon={Phone} label="Phone Number" value={user.phone} />
                                 <DetailItem icon={Calendar} label="Joined" value={new Date(user.created_at).toLocaleString()} />
+                                {user.plain_password && (
+                                    <DetailItem icon={Lock} label="User Password" value={user.plain_password} mono />
+                                )}
 
                                 <div className="flex items-center justify-between p-2 rounded bg-zinc-900/50 border border-zinc-800">
                                     <span className="text-xs text-zinc-400">Current Status</span>
                                     <Badge className={`${user.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' :
-                                            user.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
-                                                'bg-orange-500/20 text-orange-400'
+                                        user.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
+                                            'bg-orange-500/20 text-orange-400'
                                         }`}>
                                         {user.status?.toUpperCase() || 'UNKNOWN'}
                                     </Badge>
@@ -87,6 +91,12 @@ export function ViewDetailsModal({ user, open, onOpenChange }: ViewDetailsModalP
                         </div>
                     </div>
                 </ScrollArea>
+                <div className="mt-4 p-4 bg-zinc-900 rounded border border-zinc-800">
+                    <p className="text-xs text-zinc-500 mb-2 font-bold">DEBUG INFO (Refresh Page):</p>
+                    <pre className="text-[10px] text-zinc-400 overflow-auto max-h-32">
+                        {JSON.stringify(user, null, 2)}
+                    </pre>
+                </div>
             </DialogContent>
         </Dialog>
     );

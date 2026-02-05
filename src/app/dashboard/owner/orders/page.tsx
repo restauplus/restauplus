@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { OrderBoard } from "./components/OrderBoard";
-import { CheckCircle2 } from "lucide-react";
+import { KitchenMetrics } from "./components/KitchenMetrics";
+import { OrderToggle } from "./components/OrderToggle";
+import { OrdersHeader } from "./components/OrdersHeader";
 
 export default async function OrdersPage() {
     const supabase = await createClient();
@@ -15,8 +17,8 @@ export default async function OrdersPage() {
 
     if (!profile?.restaurant_id) return <div>No Restaurant Found</div>;
 
-    // 2. Fetch Active Orders
-    const { data: orders } = await supabase
+    // 2. Fetch Active Orders (for Board)
+    const { data: activeOrders } = await supabase
         .from('orders')
         .select(`
             *,
@@ -27,14 +29,25 @@ export default async function OrdersPage() {
             )
         `)
         .eq('restaurant_id', profile.restaurant_id)
-        .neq('status', 'paid') // Show everything active
+        .neq('status', 'paid')
         .neq('status', 'cancelled')
         .order('created_at', { ascending: true });
 
-    // 3. Fetch Restaurant Currency
+    // 3. Fetch Recent Completed Orders (for Stats) - Last 50 served/paid orders
+    const { data: completedOrders } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('restaurant_id', profile.restaurant_id)
+        .in('status', ['served', 'paid'])
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+    const metricsOrders = [...(activeOrders || []), ...(completedOrders || [])];
+
+    // 4. Fetch Restaurant Currency
     const { data: restaurant } = await supabase
         .from('restaurants')
-        .select('currency')
+        .select('currency, is_taking_orders')
         .eq('id', profile.restaurant_id)
         .single();
 
@@ -43,17 +56,14 @@ export default async function OrdersPage() {
     return (
         <div className="space-y-6 pt-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-white mb-1">Kitchen View</h2>
-                    <p className="text-sm text-slate-400">Manage real-time orders and preparation status.</p>
-                </div>
-                <div className="flex items-center gap-2 bg-[#1e293b] border border-[#2e3b52] px-4 py-2 rounded-xl text-sm font-medium text-teal-400 shadow-sm">
-                    <div className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
-                    <span>Live Updates Active</span>
-                </div>
+                <OrdersHeader />
+                <OrderToggle restaurantId={profile.restaurant_id} initialStatus={restaurant?.is_taking_orders ?? true} />
             </div>
 
-            <OrderBoard initialOrders={orders || []} restaurantId={profile.restaurant_id} currency={currency} />
+            {/* Metrics Dashboard */}
+            <KitchenMetrics orders={metricsOrders} />
+
+            <OrderBoard initialOrders={activeOrders || []} restaurantId={profile.restaurant_id} currency={currency} />
         </div>
     );
 }

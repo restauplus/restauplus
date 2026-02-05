@@ -104,7 +104,7 @@ export function OrderHistory({ open, onOpenChange, restaurantId, currency }: { o
                                                     })}
                                                 </span>
                                             </div>
-                                            <p className="text-sm text-zinc-400 max-w-xl truncate font-medium">
+                                            <p className="text-sm text-zinc-300 font-medium leading-relaxed">
                                                 {order.order_items.map((i: any) => `${i.quantity}x ${i.menu_items?.name}`).join(', ')}
                                             </p>
                                         </div>
@@ -122,7 +122,7 @@ export function OrderHistory({ open, onOpenChange, restaurantId, currency }: { o
                                     </div>
 
                                     {/* Timeline Grid */}
-                                    <div className="w-full pt-4 border-t border-white/5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-y-4 gap-x-2 text-xs">
+                                    <div className="w-full pt-4 border-t border-white/5 grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-y-4 gap-x-2 text-xs">
                                         <HistoryTimePoint label="Placed" time={order.created_at} color="text-zinc-400" />
                                         <HistoryTimePoint label="Preparing" time={order.preparing_at} color="text-orange-400" />
                                         <HistoryTimePoint label="Ready" time={order.ready_at} color="text-emerald-400" />
