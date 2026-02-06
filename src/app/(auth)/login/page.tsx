@@ -266,9 +266,9 @@ export default function LoginPage() {
                             transition={{ delay: 0.5 }}
                             className="text-5xl font-black tracking-tighter text-white leading-[1.1]"
                         >
-                            Welcome back!<br />
-                            Please sign in to your<br />
-                            <span className="text-glow-primary">Admin dashboard</span>
+                            Start your journey<br />
+                            with the <span className="text-glow-primary">Power of AI</span><br />
+                            management suite.
                         </motion.h2>
                         <motion.p
                             initial={{ opacity: 0, y: 10 }}
@@ -302,24 +302,24 @@ export default function LoginPage() {
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-3">
                                         <div className="flex items-center justify-between">
-                                            <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Daily Profit</span>
+                                            <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Predictive Profit</span>
                                             <IconCurrencyDollar className="w-5 h-5 text-green-500" />
                                         </div>
-                                        <div className="text-2xl font-black text-white">$12,482</div>
+                                        <div className="text-2xl font-black text-white">$145,290</div>
                                         <div className="flex items-center gap-1 text-green-500 text-xs font-bold">
                                             <IconTrendingUp className="w-3 h-3" />
-                                            +14.5%
+                                            +24.8% Projected
                                         </div>
                                     </div>
                                     <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-3">
                                         <div className="flex items-center justify-between">
-                                            <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Active Users</span>
+                                            <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Customer Growth</span>
                                             <IconUsers className="w-5 h-5 text-primary" />
                                         </div>
-                                        <div className="text-2xl font-black text-white">1,248</div>
+                                        <div className="text-2xl font-black text-white">4.2k</div>
                                         <div className="flex items-center gap-1 text-primary text-xs font-bold">
                                             <IconTrendingUp className="w-3 h-3" />
-                                            +2.1k today
+                                            Exponential
                                         </div>
                                     </div>
                                 </div>
@@ -345,7 +345,7 @@ export default function LoginPage() {
 
                                     {/* Mock Bar Chart */}
                                     <div className="h-40 flex items-end justify-between gap-3 px-2">
-                                        {[40, 70, 45, 90, 65, 30, 85, 55, 75, 50].map((height, i) => (
+                                        {[60, 40, 80, 50, 95, 70, 85, 45, 90, 65].map((height, i) => (
                                             <div key={i} className="flex-1 flex flex-col items-center gap-2">
                                                 <div className="w-full bg-white/5 rounded-t-lg relative overflow-hidden h-full">
                                                     <motion.div
@@ -361,9 +361,7 @@ export default function LoginPage() {
                                                         className="absolute bottom-0 left-0 right-0 bg-primary rounded-t-lg"
                                                     />
                                                 </div>
-                                                <span className="text-[10px] font-bold text-white/20 uppercase tracking-tighter">
-                                                    {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'][i]}
-                                                </span>
+                                                <div className="w-2 h-0.5 rounded-full bg-white/20" />
                                             </div>
                                         ))}
                                     </div>

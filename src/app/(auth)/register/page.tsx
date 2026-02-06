@@ -258,32 +258,7 @@ export default function RegisterPage() {
                             </Button>
                         </form>
 
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                                <span className="w-full border-t border-white/5" />
-                            </div>
-                            <div className="relative flex justify-center text-xs uppercase tracking-[0.2em]">
-                                <span className="bg-black px-4 text-white/30 font-bold">OR</span>
-                            </div>
-                        </div>
 
-                        <div className="grid grid-cols-1 gap-4">
-                            <Button
-                                onClick={handleGoogleLogin}
-                                disabled={googleLoading || loading}
-                                variant="outline"
-                                className="w-full h-14 bg-white/5 border-white/10 hover:bg-white/10 hover:border-primary/50 text-white rounded-2xl transition-all font-bold tracking-tight text-base"
-                            >
-                                {googleLoading ? (
-                                    <IconLoader2 className="w-6 h-6 animate-spin" />
-                                ) : (
-                                    <div className="flex items-center justify-center gap-3">
-                                        <IconBrandGoogle className="w-6 h-6" />
-                                        Continue with Google
-                                    </div>
-                                )}
-                            </Button>
-                        </div>
                     </div>
 
                     <p className="text-center text-white/50 font-medium">

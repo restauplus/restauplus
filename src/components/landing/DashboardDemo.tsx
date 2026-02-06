@@ -85,9 +85,9 @@ export function DashboardDemo() {
                         </motion.div>
 
                         <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-[1.1]">
-                            Control Your<br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">Empire</span> With<br />
-                            One Touch.
+                            All-in-one<br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">tech platform</span><br />
+                            for your restaurant
                         </h1>
 
                         <p className="text-xl text-zinc-400 max-w-lg font-medium leading-relaxed">
@@ -109,15 +109,24 @@ export function DashboardDemo() {
                             </Link>
                         </div>
 
-                        <div className="flex items-center gap-6 pt-8 border-t border-white/5">
+                        <div className="flex items-center gap-8 pt-8 border-t border-white/5">
                             <div>
-                                <h4 className="text-3xl font-black text-white">500+</h4>
-                                <p className="text-sm text-zinc-500">Restaurants Scaled</p>
+                                <h4 className="text-4xl font-black text-white">+84</h4>
+                                <p className="text-sm text-zinc-500 font-medium mt-1">Restaurants Scaled</p>
                             </div>
                             <div className="w-px h-12 bg-white/10" />
                             <div>
-                                <h4 className="text-3xl font-black text-white">$120M</h4>
-                                <p className="text-sm text-zinc-500">Processed Yearly</p>
+                                <h4 className="flex items-center gap-2 text-4xl font-black text-white">
+                                    5.0
+                                    <div className="flex gap-1 text-yellow-400">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <svg key={star} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                                                <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                                            </svg>
+                                        ))}
+                                    </div>
+                                </h4>
+                                <p className="text-sm text-zinc-500 font-medium mt-1">Customer Feedbacks</p>
                             </div>
                         </div>
                     </motion.div>
