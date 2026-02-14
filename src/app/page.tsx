@@ -4,6 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { DashboardDemo } from "@/components/landing/DashboardDemo";
 import { TrustedBy } from "@/components/landing/TrustedBy";
 import { Pricing } from "@/components/landing/Pricing";
+import { EcosystemStrip } from "@/components/landing/EcosystemStrip";
 import Silk from "@/components/Silk";
 
 export default function Home() {
@@ -26,6 +27,7 @@ export default function Home() {
         <Navbar />
         <DashboardDemo />
         <TrustedBy />
+        <EcosystemStrip />
         <Features />
         <Pricing />
         <Footer />

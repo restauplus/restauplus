@@ -7,7 +7,7 @@ import Link from "next/link";
 
 export function Pricing() {
     return (
-        <section id="pricing" className="relative py-32 bg-black overflow-hidden selection:bg-purple-500/30">
+        <section id="pricing" className="relative py-12 bg-black overflow-hidden selection:bg-purple-500/30">
             {/* Background Effects - x9999 Dynamic */}
             <div className="absolute inset-0 z-0 pointer-events-none">
                 <div className="absolute top-[-20%] left-[20%] w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[128px] animate-pulse-slow" />
@@ -15,10 +15,10 @@ export function Pricing() {
                 <div className="absolute top-[40%] left-[-10%] w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[100px] animate-pulse-slow delay-500" />
             </div>
 
-            <div className="relative z-10 container mx-auto px-4 md:px-8 space-y-20">
+            <div className="relative z-10 container mx-auto px-4 md:px-8 space-y-8">
 
                 {/* Hero Section */}
-                <div className="text-center space-y-6 mb-16">
+                <div className="text-center space-y-3 mb-8">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
@@ -34,7 +34,7 @@ export function Pricing() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-5xl md:text-7xl font-black tracking-tighter text-white"
+                        className="text-3xl md:text-5xl font-black tracking-tighter text-white"
                     >
                         Choose Your<br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-200 to-zinc-400">Path to Dominance</span>
@@ -52,17 +52,17 @@ export function Pricing() {
                         transition={{ delay: 0.2 }}
                         className="relative group h-full"
                     >
-                        <div className="h-full bg-zinc-900/50 backdrop-blur-sm rounded-3xl border border-white/10 p-8 flex flex-col hover:border-white/20 transition-all duration-300">
-                            <div className="mb-8">
-                                <h3 className="text-xl font-bold text-zinc-400 mb-2">Monthly Pro</h3>
+                        <div className="h-full bg-zinc-900/50 backdrop-blur-sm rounded-2xl border border-white/10 p-5 flex flex-col hover:border-white/20 transition-all duration-300">
+                            <div className="mb-4">
+                                <h3 className="text-lg font-bold text-zinc-400 mb-1">Monthly Pro</h3>
                                 <div className="flex items-baseline gap-2">
-                                    <span className="text-4xl font-black text-white">800 QAR</span>
-                                    <span className="text-zinc-500 font-medium">/mo</span>
+                                    <span className="text-3xl font-black text-white">499 QAR</span>
+                                    <span className="text-zinc-500 font-medium text-sm">/mo</span>
                                 </div>
-                                <div className="text-sm text-zinc-500 line-through mt-1">was 1300 QAR</div>
+                                <div className="text-xs text-zinc-500 line-through mt-0.5">was 800 QAR</div>
                             </div>
 
-                            <ul className="space-y-4 mb-8 flex-1">
+                            <ul className="space-y-2 mb-6 flex-1">
                                 {[
                                     "Real-time Dashboard",
                                     "Unlimited QR Scans",
@@ -78,7 +78,7 @@ export function Pricing() {
                             </ul>
 
                             <Link href="/register?plan=monthly" className="w-full">
-                                <Button className="w-full h-14 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-xl active:scale-95 transition-all">
+                                <Button className="w-full h-10 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-lg text-sm active:scale-95 transition-all">
                                     Select Monthly
                                 </Button>
                             </Link>
@@ -102,31 +102,31 @@ export function Pricing() {
                             </span>
                         </div>
 
-                        <div className="relative h-full bg-[#050505] rounded-[23px] p-8 flex flex-col shadow-2xl overflow-hidden">
+                        <div className="relative h-full bg-[#050505] rounded-[20px] p-5 flex flex-col shadow-2xl overflow-hidden">
                             {/* Floating Background Badge */}
-                            <div className="absolute top-[-50px] right-[-50px] w-32 h-32 bg-orange-500/20 blur-[50px] rounded-full pointer-events-none" />
+                            <div className="absolute top-[-50px] right-[-50px] w-24 h-24 bg-orange-500/20 blur-[40px] rounded-full pointer-events-none" />
 
-                            <div className="mt-6 mb-8 text-center">
-                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-purple-600 text-white mb-4 shadow-lg shadow-orange-500/30">
-                                    <Crown className="w-8 h-8 fill-current" />
+                            <div className="mt-4 mb-5 text-center">
+                                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-purple-600 text-white mb-3 shadow-lg shadow-orange-500/30">
+                                    <Crown className="w-6 h-6 fill-current" />
                                 </div>
-                                <h3 className="text-2xl font-black text-white mb-2">Founders Launch</h3>
+                                <h3 className="text-xl font-black text-white mb-1">Founders Launch</h3>
                                 <div className="flex flex-col items-center">
-                                    <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-purple-400">
+                                    <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-purple-400">
                                         FREE
                                     </div>
-                                    <span className="text-zinc-400 font-bold uppercase tracking-widest text-sm mt-1">For 10 Days</span>
+                                    <span className="text-zinc-400 font-bold uppercase tracking-widest text-[10px] mt-0.5">For 10 Days</span>
                                 </div>
                             </div>
 
-                            <div className="bg-white/5 rounded-xl p-4 mb-8 border border-white/10 relative overflow-hidden">
+                            <div className="bg-white/5 rounded-lg p-3 mb-5 border border-white/10 relative overflow-hidden">
                                 <div className="absolute top-0 left-0 w-1 h-full bg-orange-500" />
-                                <p className="text-sm font-medium text-zinc-300 text-center">
+                                <p className="text-xs font-medium text-zinc-300 text-center leading-relaxed">
                                     "Experience the full power of Restau Plus Pro with absolutely zero risk."
                                 </p>
                             </div>
 
-                            <ul className="space-y-4 mb-8">
+                            <ul className="space-y-2 mb-6">
                                 {[
                                     "Access to ALL Pro Features",
                                     "Priority Onboarding Setup",
@@ -134,9 +134,9 @@ export function Pricing() {
                                     "Valid for First 10 Restaurants",
                                     "Cancel Anytime"
                                 ].map((feature, i) => (
-                                    <li key={i} className="flex items-center gap-3 text-sm font-bold text-white">
-                                        <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center shrink-0">
-                                            <Check className="w-3 h-3 text-white stroke-[3px]" />
+                                    <li key={i} className="flex items-center gap-2 text-xs font-bold text-white">
+                                        <div className="w-4 h-4 rounded-full bg-orange-500 flex items-center justify-center shrink-0">
+                                            <Check className="w-2.5 h-2.5 text-white stroke-[3px]" />
                                         </div>
                                         {feature}
                                     </li>
@@ -144,9 +144,9 @@ export function Pricing() {
                             </ul>
 
                             <Link href="/register?plan=trial" className="w-full">
-                                <Button className="w-full h-14 bg-gradient-to-r from-orange-500 to-purple-600 hover:from-orange-400 hover:to-purple-500 text-white font-black uppercase tracking-wider rounded-xl shadow-[0_0_30px_rgba(249,115,22,0.4)] hover:shadow-[0_0_50px_rgba(168,85,247,0.6)] active:scale-95 transition-all duration-300 group">
+                                <Button className="w-full h-11 bg-gradient-to-r from-orange-500 to-purple-600 hover:from-orange-400 hover:to-purple-500 text-white font-black uppercase tracking-wider rounded-lg text-sm shadow-[0_0_20px_rgba(249,115,22,0.4)] hover:shadow-[0_0_30px_rgba(168,85,247,0.6)] active:scale-95 transition-all duration-300 group">
                                     Start Free Trial
-                                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                                 </Button>
                             </Link>
 
@@ -167,40 +167,40 @@ export function Pricing() {
                         transition={{ delay: 0.2 }}
                         className="relative group h-full"
                     >
-                        <div className="h-full bg-zinc-900/50 backdrop-blur-sm rounded-3xl border border-white/10 p-8 flex flex-col hover:border-purple-500/30 hover:bg-purple-900/10 transition-all duration-300">
-                            <div className="absolute top-0 right-0 p-6">
-                                <Star className="w-6 h-6 text-yellow-400 fill-current" />
+                        <div className="h-full bg-zinc-900/50 backdrop-blur-sm rounded-2xl border border-white/10 p-5 flex flex-col hover:border-purple-500/30 hover:bg-purple-900/10 transition-all duration-300">
+                            <div className="absolute top-0 right-0 p-4">
+                                <Star className="w-5 h-5 text-yellow-400 fill-current" />
                             </div>
 
-                            <div className="mb-8">
-                                <h3 className="text-xl font-bold text-purple-400 mb-2">Yearly Elite</h3>
+                            <div className="mb-4">
+                                <h3 className="text-lg font-bold text-purple-400 mb-1">Yearly Elite Pro</h3>
                                 <div className="flex items-baseline gap-2">
-                                    <span className="text-4xl font-black text-white">6000 QAR</span>
-                                    <span className="text-zinc-500 font-medium">/yr</span>
+                                    <span className="text-3xl font-black text-white">4850 QAR</span>
+                                    <span className="text-zinc-500 font-medium text-sm">/yr</span>
                                 </div>
-                                <div className="inline-block mt-2 px-2 py-0.5 rounded bg-green-500/20 text-green-400 text-xs font-bold">
-                                    ~500 QAR/mo (Save 40%)
+                                <div className="inline-block mt-1 px-1.5 py-0.5 rounded bg-green-500/20 text-green-400 text-[10px] font-bold">
+                                    ~404 QAR/mo (Best Value)
                                 </div>
                             </div>
 
-                            <ul className="space-y-4 mb-8 flex-1">
+                            <ul className="space-y-2 mb-6 flex-1">
                                 {[
                                     "Everything in Monthly",
                                     "Locked-in Discount Rate",
                                     "Dedicated Account Manager",
                                     "Advanced Analytics Suite",
                                     "Custom Branding Options",
-                                    "Save 3600 QAR Yearly"
+                                    "Save 1138 QAR Yearly"
                                 ].map((feature, i) => (
-                                    <li key={i} className="flex items-center gap-3 text-sm text-zinc-300">
-                                        <Check className="w-4 h-4 text-purple-500" />
+                                    <li key={i} className="flex items-center gap-2 text-xs text-zinc-300">
+                                        <Check className="w-3.5 h-3.5 text-purple-500" />
                                         {feature}
                                     </li>
                                 ))}
                             </ul>
 
                             <Link href="/register?plan=yearly" className="w-full">
-                                <Button className="w-full h-14 bg-white/5 hover:bg-purple-600 hover:text-white border border-white/10 hover:border-purple-500 text-white font-bold rounded-xl active:scale-95 transition-all">
+                                <Button className="w-full h-10 bg-white/5 hover:bg-purple-600 hover:text-white border border-white/10 hover:border-purple-500 text-white font-bold rounded-lg text-sm active:scale-95 transition-all">
                                     Go Elite Yearly
                                 </Button>
                             </Link>
