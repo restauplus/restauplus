@@ -39,6 +39,7 @@ export function OrderHistory({ open, onOpenChange, restaurantId, currency }: { o
                 tables ( number ),
                 order_items (
                     quantity,
+                    notes,
                     menu_items ( name )
                 )
             `)
@@ -56,6 +57,23 @@ export function OrderHistory({ open, onOpenChange, restaurantId, currency }: { o
         o.customer_name?.toLowerCase().includes(search.toLowerCase()) ||
         o.id.includes(search)
     );
+
+    // Helper to parse notes
+    const parseItemDetails = (notes: string | undefined | null) => {
+        if (!notes) return { note: '', variants: [] };
+        try {
+            const parsed = JSON.parse(notes);
+            if (typeof parsed === 'object' && parsed !== null) {
+                return {
+                    note: parsed.note || '',
+                    variants: parsed.variants || []
+                };
+            }
+        } catch (e) {
+            return { note: notes, variants: [] };
+        }
+        return { note: notes, variants: [] };
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -104,9 +122,27 @@ export function OrderHistory({ open, onOpenChange, restaurantId, currency }: { o
                                                     })}
                                                 </span>
                                             </div>
-                                            <p className="text-sm text-zinc-300 font-medium leading-relaxed">
-                                                {order.order_items.map((i: any) => `${i.quantity}x ${i.menu_items?.name}`).join(', ')}
-                                            </p>
+                                            <div className="text-sm text-zinc-300 font-medium leading-relaxed space-y-1 mt-1">
+                                                {order.order_items.map((i: any) => {
+                                                    const { variants, note } = parseItemDetails(i.notes);
+                                                    const variantText = variants.length > 0 ? ` (+ ${variants.map((v: any) => v.groupName ? `${v.groupName}: ${v.name}` : v.name).join(', ')})` : '';
+                                                    const noteText = note ? ` [Note: ${note}]` : '';
+                                                    return (
+                                                        <div key={i.id} className="flex flex-col">
+                                                            <div className="flex items-center">
+                                                                <span className="w-5 text-zinc-500">{i.quantity}x</span>
+                                                                <span>{i.menu_items?.name}</span>
+                                                            </div>
+                                                            {(variantText || noteText) && (
+                                                                <div className="pl-5 text-xs text-zinc-500">
+                                                                    {variantText}
+                                                                    {noteText && <span className="text-amber-500/80 block italic">{noteText}</span>}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
                                         <div className="flex flex-col items-end gap-1">
                                             <div className="flex items-center gap-3">

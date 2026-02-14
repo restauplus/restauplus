@@ -123,6 +123,7 @@ export function RestaurantApp({
         customerName: string;
         tableNumber: string;
         total: number;
+        orderNotes?: string;
     } | null>(null);
 
     useEffect(() => {
@@ -280,16 +281,7 @@ export function RestaurantApp({
             }];
         });
 
-        // Sync item notes to order instructions (Global Note)
-        if (notes && notes.trim().length > 0) {
-            setOrderNotes(prev => {
-                const cleanedNote = notes.trim();
-                if (!prev || prev.trim().length === 0) return cleanedNote;
-                // Avoid duplicating if it's already there (optional but good UX)
-                if (prev.includes(cleanedNote)) return prev;
-                return `${prev}, ${cleanedNote}`;
-            });
-        }
+
 
         toast.custom(() => (
             <div className="bg-zinc-900 text-white border border-zinc-800 px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-4 min-w-[300px]">
@@ -322,20 +314,34 @@ export function RestaurantApp({
                 order_type: orderType
             }).select().single();
             if (error) throw error;
-            await supabase.from('order_items').insert(cart.map(item => ({
-                restaurant_id: currentRestaurant.id, order_id: order.id, menu_item_id: item.id,
-                quantity: item.quantity, price_at_time: item.price
-            })));
+            await supabase.from('order_items').insert(cart.map(item => {
+                // Serialize variants and notes into a JSON object for storage
+                const details = {
+                    note: item.notes || "",
+                    variants: item.selectedVariants || []
+                };
+
+                return {
+                    restaurant_id: currentRestaurant.id,
+                    order_id: order.id,
+                    menu_item_id: item.id,
+                    quantity: item.quantity,
+                    price_at_time: item.price,
+                    notes: JSON.stringify(details) // Store as JSON string
+                };
+            }));
             setLastOrderDetails({
                 cart: [...cart],
                 customerName,
                 tableNumber,
+                orderNotes, // Add this
                 total
             });
             setCart([]); setIsCartOpen(false); setCustomerName(""); setTableNumber(""); setOrderNotes("");
             setIsOrderPlaced(true);
         } catch { toast.error("Error placing order."); } finally { setLoading(false); }
     };
+
 
     const cartTotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
     const cartCount = cart.reduce((a, b) => a + b.quantity, 0);
@@ -1295,7 +1301,7 @@ export function RestaurantApp({
 
                                 {currentRestaurant.address && (
                                     <a
-                                        href={`https://maps.google.com/?q=${encodeURIComponent(currentRestaurant.address)}`}
+                                        href={currentRestaurant.google_maps_link || `https://maps.google.com/?q=${encodeURIComponent(currentRestaurant.address)}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="flex items-center gap-5 p-5 rounded-[2rem] bg-white/60 backdrop-blur-xl border border-white/50 shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all hover:bg-white hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:scale-[1.02] active:scale-[0.98] group"
@@ -1635,6 +1641,19 @@ export function RestaurantApp({
                                         </div>
                                     </div>
 
+                                    {/* Global Instructions (if any) */}
+                                    {lastOrderDetails.orderNotes && (
+                                        <div className="w-full bg-blue-50/50 border border-blue-100 p-4 rounded-2xl flex flex-col items-start text-left mb-6">
+                                            <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1 flex items-center gap-1">
+                                                <Info className="w-3 h-3" />
+                                                {language === 'ar' ? "ملاحظات" : "Instructions"}
+                                            </span>
+                                            <p className="text-xs font-medium text-zinc-700 leading-relaxed">
+                                                {lastOrderDetails.orderNotes}
+                                            </p>
+                                        </div>
+                                    )}
+
                                     {/* Divider */}
                                     <div className="w-full flex items-center justify-between pointer-events-none opacity-20 mb-6">
                                         <div className="w-6 h-6 rounded-full bg-zinc-900 -ml-11" />
@@ -1643,25 +1662,42 @@ export function RestaurantApp({
                                     </div>
 
                                     {/* Order Items Summary */}
-                                    <div className="w-full space-y-3 mb-6 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
+                                    <div className="w-full space-y-4 mb-6 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
                                         {lastOrderDetails.cart.map((item, idx) => (
-                                            <div key={idx} className="flex justify-between items-start text-sm">
+                                            <div key={idx} className="flex justify-between items-start text-sm border-b border-zinc-50 pb-3 last:border-0 last:pb-0">
                                                 <div className="flex gap-3 text-left">
-                                                    <span className="font-black text-zinc-200 bg-zinc-900 w-6 h-6 flex items-center justify-center rounded-md text-[10px] shrink-0">
+                                                    <span className="font-black text-zinc-200 bg-zinc-900 w-6 h-6 flex items-center justify-center rounded-md text-[10px] shrink-0 mt-0.5">
                                                         {item.quantity}x
                                                     </span>
                                                     <div className="flex flex-col">
                                                         <span className="font-bold text-zinc-800 leading-tight">
                                                             {getItemName(item.name)}
                                                         </span>
+
+                                                        {/* Variants with Group Names */}
                                                         {item.selectedVariants && item.selectedVariants.length > 0 && (
-                                                            <span className="text-[10px] text-zinc-400 capitalize">
-                                                                {item.selectedVariants.map(v => v.name).join(', ')}
-                                                            </span>
+                                                            <div className="flex flex-wrap gap-1 mt-1">
+                                                                {item.selectedVariants.map((v, vIdx) => (
+                                                                    <span key={vIdx} className="text-[10px] font-medium text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded-md border border-zinc-200">
+                                                                        {v.groupName ? <span className="text-zinc-400 mr-1">{v.groupName}:</span> : '+ '}
+                                                                        {v.name}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        )}
+
+                                                        {/* Item Note */}
+                                                        {item.notes && (
+                                                            <div className="flex items-start gap-1.5 mt-1.5">
+                                                                <span className="mt-0.5 text-[10px] opacity-50">📝</span>
+                                                                <span className="text-[10px] italic text-zinc-500 font-medium bg-zinc-50 px-1.5 py-0.5 rounded-md text-left">
+                                                                    {item.notes}
+                                                                </span>
+                                                            </div>
                                                         )}
                                                     </div>
                                                 </div>
-                                                <span className="font-bold text-zinc-900 whitespace-nowrap">
+                                                <span className="font-bold text-zinc-900 whitespace-nowrap pl-2">
                                                     {currencySymbol}{(item.price * item.quantity).toFixed(2)}
                                                 </span>
                                             </div>
@@ -1685,6 +1721,13 @@ export function RestaurantApp({
                                     >
                                         {language === 'ar' ? "إغلاق" : "Done, Thanks"}
                                     </motion.button>
+
+                                    {/* Powered By Footer */}
+                                    <div className="mt-8 flex items-center justify-center gap-1.5 opacity-40 grayscale">
+                                        <span className="text-[10px] font-black text-zinc-900 tracking-widest">POWERED BY</span>
+                                        <img src="/logo.png" className="h-3 w-auto object-contain brightness-0" alt="Restau Plus" />
+                                        <span className="text-[10px] font-black text-zinc-900 tracking-widest">RESTAU PLUS</span>
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>

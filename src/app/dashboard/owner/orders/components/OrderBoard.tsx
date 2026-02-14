@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,12 +6,12 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, CheckCircle2, ChefHat, BellRing, UtensilsCrossed, User, Hash, DollarSign, RefreshCcw } from "lucide-react";
+import { Clock, CheckCircle2, ChefHat, BellRing, UtensilsCrossed, User, Hash, DollarSign, RefreshCcw, Printer } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/context/language-context";
-
 import { OrderHistory } from "./OrderHistory";
+import { NewOrderPopup } from "./NewOrderPopup";
 
 type OrderStatus = 'pending' | 'preparing' | 'ready' | 'served' | 'paid';
 
@@ -27,18 +26,40 @@ interface Order {
     paid_at?: string;
     customer_name?: string | null;
     table_number?: string | null;
-    notes?: string | null; // Added notes field
-    order_type?: 'dine_in' | 'takeaway'; // Added order_type
+    notes?: string | null;
+    total_amount?: number;
+    order_type?: 'dine_in' | 'takeaway';
     tables: { number: string } | null;
     order_items: {
         id: string;
         quantity: number;
-        menu_items: { name: string } | null;
+        menu_items: { name: string; price: number } | null;
         notes?: string;
+        price_at_time?: number;
     }[];
 }
 
-export function OrderBoard({ initialOrders, restaurantId, currency }: { initialOrders: any[], restaurantId: string, currency: string }) {
+export function OrderBoard({
+    initialOrders,
+    restaurantId,
+    currency,
+    restaurantName,
+    restaurantLogo,
+    restaurantAddress,
+    restaurantPhone,
+    restaurantEmail,
+    restaurantWebsite
+}: {
+    initialOrders: any[],
+    restaurantId: string,
+    currency: string,
+    restaurantName?: string,
+    restaurantLogo?: string | null,
+    restaurantAddress?: string | null,
+    restaurantPhone?: string | null,
+    restaurantEmail?: string | null,
+    restaurantWebsite?: string | null
+}) {
     const [orders, setOrders] = useState<Order[]>(initialOrders);
     const [showHistory, setShowHistory] = useState(false);
     const supabase = createClient();
@@ -51,7 +72,36 @@ export function OrderBoard({ initialOrders, restaurantId, currency }: { initialO
         { status: 'served', label: t('ordersPage.board.columns.served'), icon: UtensilsCrossed, color: 'text-indigo-500', glow: 'shadow-indigo-500/20' },
     ];
 
+    const [isConnected, setIsConnected] = useState(false);
+    const [newOrderModal, setNewOrderModal] = useState<Order | null>(null);
+
+    // Sound Logic - "Ultra Pro"
+    const playNotificationSound = async () => {
+        try {
+            const audio = new Audio('/shopify-sales.mp3');
+            audio.volume = 1.0;
+            await audio.play();
+        } catch (e) {
+            console.error("Audio playback failed", e);
+        }
+    };
+
     useEffect(() => {
+        // Resume AudioContext on first click
+        const enableAudio = () => {
+            const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+            if (AudioContext) {
+                const ctx = new AudioContext();
+                ctx.resume();
+            }
+        };
+        document.addEventListener('click', enableAudio, { once: true });
+
+        // Request Notification Permission
+        if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
         const channel = supabase
             .channel('realtime orders')
             .on(
@@ -66,7 +116,7 @@ export function OrderBoard({ initialOrders, restaurantId, currency }: { initialO
                     if (payload.eventType === 'INSERT') {
                         const { data: newOrder } = await supabase
                             .from('orders')
-                            .select(`*, tables(number), order_items(*, menu_items(name))`)
+                            .select(`*, tables(number), order_items(*, menu_items(name, price))`)
                             .eq('id', payload.new.id)
                             .single();
 
@@ -74,23 +124,36 @@ export function OrderBoard({ initialOrders, restaurantId, currency }: { initialO
                             setOrders(prev => [newOrder, ...prev]);
                             const tableInfo = newOrder.table_number || (newOrder.tables?.number ? `Table ${newOrder.tables.number}` : "Express");
 
-                            // Play notification sound
-                            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-                            audio.play().catch(e => console.log("Audio play blocked:", e));
+                            // 1. Play Sound
+                            playNotificationSound();
 
-                            toast.success("New Order Received!", {
-                                description: `${tableInfo} - ${newOrder.customer_name || 'Guest'}`,
-                                className: "glass-card border-primary/50"
-                            });
+                            // 2. Trigger Blocking Modal
+                            setNewOrderModal(newOrder);
+
+                            // 3. System Notification
+                            if (document.visibilityState === 'hidden' && 'Notification' in window && Notification.permission === 'granted') {
+                                new Notification(`New Order: ${tableInfo}`, {
+                                    body: `${newOrder.customer_name || 'Guest'} - ${newOrder.order_items?.length || 0} items`,
+                                    icon: '/logo.png'
+                                });
+                            }
                         }
                     } else if (payload.eventType === 'UPDATE') {
                         setOrders(prev => prev.map(o => o.id === payload.new.id ? { ...o, ...payload.new } : o));
                     }
                 }
             )
-            .subscribe();
+            .subscribe((status) => {
+                if (status === 'SUBSCRIBED') setIsConnected(true);
+                if (status === 'CHANNEL_ERROR') {
+                    console.error("Realtime subscription error");
+                    setIsConnected(false);
+                }
+                if (status === 'TIMED_OUT') setIsConnected(false);
+            });
 
         return () => {
+            document.removeEventListener('click', enableAudio);
             supabase.removeChannel(channel);
         };
     }, [supabase, restaurantId]);
@@ -113,36 +176,25 @@ export function OrderBoard({ initialOrders, restaurantId, currency }: { initialO
         const { error } = await supabase.from('orders').update(updateData).eq('id', orderId);
 
         if (error) {
-            // Only log as error if it's NOT a missing column issue (which we handle via retry)
-            // PGRST204 = missing column
             const isMissingColumn = error.code === 'PGRST204' || error.message?.includes('Could not find the');
 
             if (!isMissingColumn) {
                 console.error("Update with timestamp failed:", JSON.stringify(error));
             }
 
-            // Fallback: Try updating STATUS ONLY (if columns are missing or type mismatch)
+            // Fallback: Try updating STATUS ONLY
             if (timestampField) {
                 const { error: retryError } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
-
                 if (!retryError) {
-                    toast.success(`Order moved to ${newStatus}`, {
-                        className: "glass-card",
-                        description: "Dashboard updated. (Timestamps skipped)"
-                    });
-                    return; // Success on retry
-                } else {
-                    console.error("Retry failed:", JSON.stringify(retryError));
+                    toast.success(`Order moved to ${newStatus} (Timestamps skipped)`, { className: "glass-card" });
+                    return;
                 }
             }
 
-            toast.error(`Update failed: ${error.message || 'Unknown error'}`);
-            // Revert optimistic update on error
+            toast.error(`Update failed: ${error.message}`);
             setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: o.status } : o));
         } else {
-            toast.success(`Order moved to ${newStatus}`, {
-                className: "glass-card"
-            });
+            toast.success(`Order moved to ${newStatus}`, { className: "glass-card" });
         }
     };
 
@@ -159,7 +211,9 @@ export function OrderBoard({ initialOrders, restaurantId, currency }: { initialO
                     tables ( number ),
                     order_items (
                         *,
-                        menu_items ( name )
+                        *,
+                        menu_items ( name, price )
+                    )
                     )
                 `)
                 .eq('restaurant_id', restaurantId)
@@ -170,12 +224,9 @@ export function OrderBoard({ initialOrders, restaurantId, currency }: { initialO
             if (error) throw error;
 
             if (refreshedOrders) {
-                // @ts-ignore - Supabase types might be slightly mismatched with our Order interface but structure matches
+                // @ts-ignore
                 setOrders(refreshedOrders);
-                toast.success("Orders refreshed", {
-                    description: "Latest orders fetched successfully",
-                    className: "glass-card"
-                });
+                toast.success("Orders refreshed", { className: "glass-card" });
             }
         } catch (error) {
             console.error("Error refreshing orders:", error);
@@ -187,7 +238,30 @@ export function OrderBoard({ initialOrders, restaurantId, currency }: { initialO
 
     return (
         <div className="flex-1 h-full overflow-hidden flex flex-col pt-2">
-            <div className="flex justify-end px-6 pb-2 gap-2">
+
+            {/* New Order Popup */}
+            <AnimatePresence>
+                {newOrderModal && (
+                    <NewOrderPopup
+                        order={newOrderModal}
+                        onAccept={() => setNewOrderModal(null)}
+                        onClose={() => { }}
+                    />
+                )}
+            </AnimatePresence>
+
+            <div className="flex justify-end px-6 pb-2 gap-2 items-center">
+                {/* Connection Status */}
+                <div className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border transition-all",
+                    isConnected
+                        ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 shadow-[0_0_10px_-4px_#10b981]"
+                        : "bg-red-500/10 text-red-500 border-red-500/20"
+                )}>
+                    <div className={cn("w-1.5 h-1.5 rounded-full", isConnected ? "bg-emerald-500 animate-pulse" : "bg-red-500")} />
+                    {isConnected ? "LIVE" : "OFFLINE"}
+                </div>
+
                 <Button
                     variant="outline"
                     onClick={refreshOrders}
@@ -206,9 +280,8 @@ export function OrderBoard({ initialOrders, restaurantId, currency }: { initialO
                 </Button>
             </div>
 
-            {/* Mobile/Tablet View: Tabs + Active List */}
+            {/* Mobile/Tablet View */}
             <div className="xl:hidden flex flex-col h-full px-4">
-                {/* Tabs */}
                 <div className="flex gap-3 overflow-x-auto md:grid md:grid-cols-4 pb-6 no-scrollbar px-1 scroll-padding-x-4">
                     {columns.map(col => {
                         const isActive = activeTab === col.status;
@@ -236,12 +309,21 @@ export function OrderBoard({ initialOrders, restaurantId, currency }: { initialO
                     })}
                 </div>
 
-                {/* Mobile Active Column Content */}
                 <div className="flex-1 overflow-y-auto custom-scrollbar pb-20 px-1">
                     <AnimatePresence mode="popLayout">
                         {orders.filter(o => o.status === activeTab).map(order => (
                             <div key={order.id} className="mb-4">
-                                <OrderCard order={order} onUpdate={updateStatus} />
+                                <OrderCard
+                                    order={order}
+                                    onUpdate={updateStatus}
+                                    currency={currency}
+                                    restaurantName={restaurantName}
+                                    restaurantLogo={restaurantLogo}
+                                    restaurantAddress={restaurantAddress}
+                                    restaurantPhone={restaurantPhone}
+                                    restaurantEmail={restaurantEmail}
+                                    restaurantWebsite={restaurantWebsite}
+                                />
                             </div>
                         ))}
                     </AnimatePresence>
@@ -264,7 +346,6 @@ export function OrderBoard({ initialOrders, restaurantId, currency }: { initialO
                 <div className="flex gap-6 h-full min-w-[1300px] px-1">
                     {columns.map(col => (
                         <div key={col.status} className="flex-1 min-w-[320px] flex flex-col gap-4">
-                            {/* Column Header */}
                             <motion.div
                                 initial={{ opacity: 0, y: -10 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -286,7 +367,18 @@ export function OrderBoard({ initialOrders, restaurantId, currency }: { initialO
                                     {orders
                                         .filter(o => o.status === col.status)
                                         .map(order => (
-                                            <OrderCard key={order.id} order={order} onUpdate={updateStatus} />
+                                            <OrderCard
+                                                key={order.id}
+                                                order={order}
+                                                onUpdate={updateStatus}
+                                                currency={currency}
+                                                restaurantName={restaurantName}
+                                                restaurantLogo={restaurantLogo}
+                                                restaurantAddress={restaurantAddress}
+                                                restaurantPhone={restaurantPhone}
+                                                restaurantEmail={restaurantEmail}
+                                                restaurantWebsite={restaurantWebsite}
+                                            />
                                         ))}
                                 </AnimatePresence>
                                 {orders.filter(o => o.status === col.status).length === 0 && (
@@ -311,20 +403,412 @@ export function OrderBoard({ initialOrders, restaurantId, currency }: { initialO
     );
 }
 
-function OrderCard({ order, onUpdate }: { order: Order; onUpdate: (id: string, status: OrderStatus) => void }) {
+function OrderCard({
+    order,
+    onUpdate,
+    currency,
+    restaurantName = "Restaurant",
+    restaurantLogo,
+    restaurantAddress,
+    restaurantPhone,
+    restaurantEmail,
+    restaurantWebsite
+}: {
+    order: Order;
+    onUpdate: (id: string, status: OrderStatus) => void;
+    currency: string;
+    restaurantName?: string;
+    restaurantLogo?: string | null;
+    restaurantAddress?: string | null;
+    restaurantPhone?: string | null;
+    restaurantEmail?: string | null;
+    restaurantWebsite?: string | null;
+}) {
     const [elapsedMinutes, setElapsedMinutes] = useState(0);
     const { t } = useLanguage();
 
+    const parseItemDetails = (notes: string | undefined | null) => {
+        if (!notes) return { note: '', variants: [] };
+        try {
+            const parsed = JSON.parse(notes);
+            if (typeof parsed === 'object' && parsed !== null) {
+                return {
+                    note: parsed.note || '',
+                    variants: parsed.variants || []
+                };
+            }
+        } catch (e) {
+            return { note: notes, variants: [] };
+        }
+        return { note: notes, variants: [] };
+    };
+
     useEffect(() => {
-        const interval = setInterval(() => {
+        const calculateElapsed = () => {
             setElapsedMinutes(Math.floor((Date.now() - new Date(order.created_at).getTime()) / 60000));
-        }, 10000);
-        setElapsedMinutes(Math.floor((Date.now() - new Date(order.created_at).getTime()) / 60000));
+        };
+        const interval = setInterval(calculateElapsed, 10000);
+        calculateElapsed();
         return () => clearInterval(interval);
     }, [order.created_at]);
 
     const isLate = elapsedMinutes > 15;
     const tableDisplay = order.table_number || (order.tables?.number ? `${t('ordersPage.board.table')} ${order.tables.number}` : "Express");
+
+    const handlePrint = () => {
+        const existingIframe = document.getElementById('receipt-print-frame');
+        if (existingIframe) existingIframe.remove();
+
+        const iframe = document.createElement('iframe');
+        iframe.id = 'receipt-print-frame';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+
+        const total = order.total_amount || order.order_items.reduce((sum, item) => sum + (item.quantity * (item.menu_items?.price || 0)), 0);
+        const dateObj = new Date(order.created_at);
+        const date = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getFullYear()}`;
+        const time = `${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
+        const currencySymbol = currency === 'QAR' ? 'QR' : currency === 'MAD' ? 'DH' : '$';
+
+        const receiptHTML = `
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <title>Restaurant Receipt</title>
+                    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;600;800;900&display=swap" rel="stylesheet">
+                    <style>
+                        body {
+                            font-family: 'Work Sans', sans-serif;
+                            margin: 0;
+                            padding: 0;
+                            width: 100%;
+                            background: #fff;
+                            color: #000;
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                        }
+
+                        @page { margin: 0; size: auto; }
+
+                        .receipt-container {
+                            width: 100%;
+                            max-width: 100%;
+                            margin: 0 auto;
+                            padding: 20px 10px;
+                            box-sizing: border-box;
+                        }
+
+                        /* HEADER SECTION */
+                        .header {
+                            text-align: center;
+                            margin-bottom: 15px;
+                        }
+                        .logo-container img {
+                            max-width: 120px;
+                            height: auto;
+                            display: block;
+                            margin: 0 auto 10px auto;
+                        }
+                        .restaurant-name {
+                            font-size: 24px;
+                            font-weight: 900;
+                            text-transform: uppercase;
+                            letter-spacing: -0.5px;
+                            line-height: 1.1;
+                            margin-bottom: 5px;
+                        }
+                        .restaurant-info {
+                            font-size: 11px;
+                            color: #333;
+                            line-height: 1.4;
+                            font-weight: 500;
+                            max-width: 80%;
+                            margin: 0 auto;
+                        }
+
+                        /* DIVIDER */
+                        .divider-thick {
+                            border-top: 3px solid #000;
+                            margin: 15px 0;
+                        }
+                        .divider-thin {
+                            border-top: 1px solid #ddd;
+                            margin: 10px 0;
+                        }
+
+                        /* META SECTION */
+                        .meta-grid {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            margin-bottom: 15px;
+                            font-size: 12px;
+                            font-weight: 600;
+                        }
+                        .order-number {
+                            font-size: 16px;
+                            font-weight: 900;
+                        }
+                        .order-type-badge {
+                            background: #000;
+                            color: #fff;
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                            font-weight: 800;
+                            text-transform: uppercase;
+                            font-size: 11px;
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                        }
+
+                        /* CUSTOMER INFO */
+                        .customer-section {
+                            margin-bottom: 20px;
+                            text-align: center;
+                        }
+                        .customer-name {
+                            font-size: 18px;
+                            font-weight: 800;
+                            text-transform: uppercase;
+                            border: 2px solid #000;
+                            display: inline-block;
+                            padding: 5px 15px;
+                            border-radius: 50px; /* Pill shape */
+                            background: #fff;
+                        }
+
+                        /* ITEMS TABLE */
+                        .items-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-bottom: 20px;
+                        }
+                        .items-table th {
+                            text-align: left;
+                            font-size: 10px;
+                            text-transform: uppercase;
+                            color: #666;
+                            padding-bottom: 8px;
+                            border-bottom: 1px solid #000;
+                        }
+                        .items-table td {
+                            padding: 8px 0;
+                            vertical-align: top;
+                            font-size: 13px;
+                            border-bottom: 1px dashed #eee;
+                        }
+                        .col-qty { width: 30px; font-weight: 800; text-align: center; }
+                        .col-desc { padding-left: 10px; font-weight: 600; }
+                        .col-price { text-align: right; font-family: 'Space Mono', monospace; font-weight: 700; }
+
+                        .item-note {
+                            display: block;
+                            font-size: 10px;
+                            color: #666;
+                            font-style: italic;
+                            margin-top: 2px;
+                        }
+
+                        /* TOTAL SECTION */
+                        .total-section {
+                            background: #f5f5f5;
+                            padding: 15px;
+                            border-radius: 8px;
+                            margin-bottom: 20px;
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                        }
+                        .total-row {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            font-weight: 900;
+                            font-size: 18px;
+                        }
+                        .sub-row {
+                            display: flex;
+                            justify-content: space-between;
+                            font-size: 11px;
+                            color: #666;
+                            margin-bottom: 5px;
+                        }
+
+                        /* QR CODE AREA */
+                        .qr-section {
+                            text-align: center;
+                            margin-bottom: 20px;
+                        }
+                        .qr-code {
+                            width: 80px;
+                            height: 80px;
+                            margin: 0 auto 10px auto;
+                        }
+
+                        /* FOOTER */
+                        .footer {
+                            text-align: center;
+                            margin-top: 30px;
+                        }
+                        .thank-you {
+                            font-family: 'Space Mono', monospace;
+                            font-weight: 700;
+                            font-size: 14px;
+                            text-transform: uppercase;
+                            margin-bottom: 5px;
+                        }
+                        .footer-msg {
+                            font-size: 10px;
+                            color: #666;
+                            max-width: 80%;
+                            margin: 0 auto 20px auto;
+                        }
+                        .powered-by {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 9px;
+                            font-weight: 700;
+                            text-transform: uppercase;
+                            opacity: 0.6;
+                            gap: 5px;
+                        }
+                        .brand-dot {
+                            width: 4px;
+                            height: 4px;
+                            background: #000;
+                            border-radius: 50%;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="receipt-container">
+
+                        <!-- HEADER -->
+                        <div class="header">
+                            <div class="logo-container">
+                                ${restaurantLogo ? `<img src="${restaurantLogo}" alt="Logo" />` : ''}
+                            </div>
+                            <div class="restaurant-name">${restaurantName}</div>
+                            ${restaurantAddress || restaurantPhone ? `
+                                <div class="restaurant-info">
+                                    ${restaurantAddress ? `${restaurantAddress}<br/>` : ''}
+                                    ${restaurantPhone ? `Tel: ${restaurantPhone}` : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="divider-thick"></div>
+
+                        <!-- META INFO -->
+                        <div class="meta-grid">
+                            <div>
+                                <div class="order-number">#${order.id.slice(0, 4)}</div>
+                                <div style="font-weight: 400; color: #555; font-size: 10px;">${date} • ${time}</div>
+                            </div>
+                            <div class="order-type-badge">${(order.order_type || 'DINE IN').replace('_', ' ')}</div>
+                        </div>
+
+                        <!-- CUSTOMER NAME PILL -->
+                        ${order.customer_name ? `
+                            <div class="customer-section">
+                                <div class="customer-name">${order.customer_name}</div>
+                            </div>
+                        ` : ''}
+
+                        <!-- ITEMS -->
+                        <table class="items-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-qty">#</th>
+                                    <th class="col-desc">ITEM</th>
+                                    <th class="col-price">PRICE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${order.order_items.map(item => {
+            const { note, variants } = parseItemDetails(item.notes);
+
+            // Construct Variants HTML
+            const variantsHtml = variants.length > 0 ?
+                `<div style="font-size: 9px; margin-top: 2px; color: #444;">${variants.map((v: any) =>
+                    `<span style="display:inline-block; background:#eee; padding: 1px 4px; border-radius: 3px; margin-right: 2px;">
+                                                ${v.groupName ? `<span style="color:#666; margin-right:2px">${v.groupName}:</span>` : '+ '}
+                                                ${v.name}
+                                            </span>`
+                ).join('')}</div>` : '';
+
+            // Construct Note HTML
+            const noteHtml = note ?
+                `<div class="item-note" style="margin-top:2px;">Note: ${note}</div>` : '';
+
+            return `
+                                        <tr>
+                                            <td class="col-qty">${item.quantity}</td>
+                                            <td class="col-desc">
+                                                <div style="font-weight:700;">${item.menu_items?.name || 'Unknown Item'}</div>
+                                                ${variantsHtml}
+                                                ${noteHtml}
+                                            </td>
+                                            <td class="col-price">${(item.price_at_time || item.menu_items?.price || 0).toFixed(2)}</td>
+                                        </tr>
+                                    `;
+        }).join('')}
+                            </tbody>
+                        </table>
+
+                        <!-- TOTAL -->
+                        <div class="total-section">
+                            <div class="sub-row">
+                                <span>Subtotal</span>
+                                <span>${currencySymbol} ${(total).toFixed(2)}</span>
+                            </div>
+                            <div class="divider-thin"></div>
+                            <div class="total-row">
+                                <span>TOTAL</span>
+                                <span>${currencySymbol} ${total.toFixed(2)}</span>
+                            </div>
+                        </div>
+
+                        <!-- QR CODE (Dynamic) -->
+                        ${restaurantWebsite ? `
+                            <div class="qr-section">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(restaurantWebsite)}" class="qr-code" alt="QR Code"/>
+                                <div style="font-size: 9px; font-weight: 600;">SCAN TO VISIT US</div>
+                            </div>
+                        ` : ''}
+
+                        <!-- FOOTER -->
+                        <div class="footer">
+                            <div class="thank-you">Thank You!</div>
+                            <div class="footer-msg">We hope to serve you again soon.</div>
+
+                            <div class="powered-by" style="display: flex; align-items: center; justify-content: center; opacity: 0.6;">
+                                <span style="font-weight: 800; letter-spacing: 0.5px; margin-right: 4px;">POWERED BY</span>
+                                <img src="${window.location.origin}/logo.png" style="height: 12px; filter: brightness(0);" alt="R+" />
+                                <span style="font-weight: 800; letter-spacing: 0.5px; margin-left: 4px;">RESTAU PLUS</span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <script>
+                        window.onload = function() { window.print(); window.close(); }
+                    </script>
+                </body>
+            </html>
+        `;
+
+        if (iframe.contentWindow) {
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write(receiptHTML);
+            iframe.contentWindow.document.close();
+            setTimeout(() => {
+                if (iframe.contentWindow) {
+                    iframe.contentWindow.focus();
+                    iframe.contentWindow.print();
+                }
+            }, 500);
+        }
+    };
 
     return (
         <motion.div
@@ -338,7 +822,6 @@ function OrderCard({ order, onUpdate }: { order: Order; onUpdate: (id: string, s
                 <CardHeader className="p-4 flex flex-row justify-between items-start space-y-0">
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 mb-1">
-                            {/* Order Type Badge */}
                             <Badge variant="outline" className={cn(
                                 "text-[10px] uppercase tracking-wider font-bold border rounded-md px-1.5 py-0.5",
                                 order.order_type === 'takeaway'
@@ -354,100 +837,67 @@ function OrderCard({ order, onUpdate }: { order: Order; onUpdate: (id: string, s
                             <span className="text-sm font-semibold text-white">{tableDisplay}</span>
                         </div>
                         {order.customer_name && (
-                            <p className="text-sm text-zinc-300 font-medium">
-                                {order.customer_name}
-                            </p>
+                            <p className="text-sm text-zinc-300 font-medium">{order.customer_name}</p>
                         )}
-                        <div className={cn(
-                            "flex items-center gap-1.5 text-xs font-medium pt-1",
-                            isLate ? "text-red-400" : "text-zinc-500"
-                        )}>
+                        <div className={cn("flex items-center gap-1.5 text-xs font-medium pt-1", isLate ? "text-red-400" : "text-zinc-500")}>
                             <Clock className="w-3.5 h-3.5" />
                             {elapsedMinutes} {t('ordersPage.metrics.min')}
                         </div>
                     </div>
-
-                    {/* Actions */}
                     <div className="flex flex-col gap-2">
-                        {order.status === 'pending' && (
-                            <Button
-                                size="sm"
-                                onClick={() => onUpdate(order.id, 'preparing')}
-                                className="h-8 bg-teal-600 hover:bg-teal-500 text-white font-medium rounded-lg shadow-sm text-xs"
-                            >
-                                {t('ordersPage.board.actions.markPreparing')}
+                        <div className="flex gap-2 justify-end">
+                            <Button size="icon" variant="outline" onClick={handlePrint} className="h-8 w-8 bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-zinc-400" title="Print Bill">
+                                <Printer className="w-4 h-4" />
                             </Button>
-                        )}
-                        {order.status === 'preparing' && (
-                            <Button
-                                size="sm"
-                                onClick={() => onUpdate(order.id, 'ready')}
-                                className="h-8 bg-orange-600 hover:bg-orange-500 text-white font-medium rounded-lg shadow-sm text-xs"
-                            >
-                                {t('ordersPage.board.actions.markReady')}
-                            </Button>
-                        )}
-                        {order.status === 'ready' && (
-                            <Button
-                                size="sm"
-                                onClick={() => onUpdate(order.id, 'served')}
-                                className="h-8 bg-green-600 hover:bg-green-500 text-white font-medium rounded-lg shadow-sm text-xs"
-                            >
-                                {t('ordersPage.board.actions.markServed')}
-                            </Button>
-                        )}
-                        {order.status === 'served' && (
-                            <Button
-                                size="sm"
-                                onClick={() => onUpdate(order.id, 'paid')}
-                                className="h-8 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg shadow-sm text-xs w-full"
-                            >
-                                <DollarSign className="w-3 h-3 me-1" />
-                                {t('ordersPage.board.actions.markPaid')}
-                            </Button>
-                        )}
+                        </div>
+                        {order.status === 'pending' && <Button size="sm" onClick={() => onUpdate(order.id, 'preparing')} className="h-8 bg-teal-600 hover:bg-teal-500 text-white font-medium rounded-lg shadow-sm text-xs w-full">{t('ordersPage.board.actions.markPreparing')}</Button>}
+                        {order.status === 'preparing' && <Button size="sm" onClick={() => onUpdate(order.id, 'ready')} className="h-8 bg-orange-600 hover:bg-orange-500 text-white font-medium rounded-lg shadow-sm text-xs w-full">{t('ordersPage.board.actions.markReady')}</Button>}
+                        {order.status === 'ready' && <Button size="sm" onClick={() => onUpdate(order.id, 'served')} className="h-8 bg-green-600 hover:bg-green-500 text-white font-medium rounded-lg shadow-sm text-xs w-full">{t('ordersPage.board.actions.markServed')}</Button>}
+                        {order.status === 'served' && <Button size="sm" onClick={() => onUpdate(order.id, 'paid')} className="h-8 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg shadow-sm text-xs w-full"><DollarSign className="w-3 h-3 me-1" />{t('ordersPage.board.actions.markPaid')}</Button>}
                     </div>
                 </CardHeader>
-
                 <CardContent className="p-4 pt-0 space-y-3">
                     <div className="h-px bg-zinc-800 w-full" />
-                    <div className="space-y-2">
-                        {order.order_items.map(item => (
-                            <div key={item.id} className="flex justify-between items-center text-sm">
-                                <span className="text-zinc-300">
-                                    <span className="font-semibold text-white me-2">{item.quantity}x</span>
-                                    {item.menu_items?.name || t('ordersPage.board.item') + '?'}
-                                </span>
-                            </div>
-                        ))}
+                    <div className="space-y-3">
+                        {order.order_items.map(item => {
+                            const { note, variants } = parseItemDetails(item.notes);
+                            return (
+                                <div key={item.id} className="border-b border-zinc-800/50 pb-2 last:border-0 last:pb-0">
+                                    <div className="flex justify-between items-start text-sm">
+                                        <span className="text-zinc-200 font-medium">
+                                            <span className="font-bold text-primary me-2">{item.quantity}x</span>
+                                            {item.menu_items?.name || t('ordersPage.board.item')}
+                                        </span>
+                                    </div>
+                                    {variants.length > 0 && (
+                                        <div className="pl-6 mt-1 flex flex-wrap gap-1">
+                                            {variants.map((v: any, idx: number) => (
+                                                <Badge key={idx} variant="secondary" className="text-[10px] h-auto py-0.5 px-1.5 bg-zinc-800/80 text-zinc-400 border-zinc-700/50">
+                                                    {v.groupName ? <span className="text-zinc-500 mr-1">{v.groupName}:</span> : '+ '}{v.name}
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {note && (
+                                        <div className="pl-6 mt-1.5">
+                                            <p className="text-xs text-amber-500/90 italic flex items-start gap-1.5 bg-amber-500/5 p-1.5 rounded-md border border-amber-500/10">
+                                                <span className="mt-0.5">📝</span>{note}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
-
-                    {/* Order Notes (Instructions) */}
                     {order.notes && (
                         <div className="pt-2">
                             <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                                <p className="text-xs text-blue-400 font-medium flex items-start gap-2">
-                                    <span className="mt-0.5">📝</span>
-                                    <span className="font-bold">{t('ordersPage.board.note')}:</span> {order.notes}
-                                </p>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Item Notes */}
-                    {order.order_items.some(i => i.notes) && (
-                        <div className="pt-2">
-                            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                                <p className="text-xs text-amber-400 font-medium flex items-start gap-2">
-                                    <span className="mt-0.5">⚠️</span>
-                                    {order.order_items.map(i => i.notes).filter(Boolean).join(", ")}
-                                </p>
+                                <h4 className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1 opacity-70">{t('ordersPage.board.note')}</h4>
+                                <p className="text-xs text-blue-300 font-medium leading-relaxed">{order.notes}</p>
                             </div>
                         </div>
                     )}
                 </CardContent>
-
-                {/* Timeline Details - User Request Horizontal Design */}
                 <div className="bg-zinc-950/30 p-4 border-t border-white/5">
                     <div className="grid grid-cols-5 text-center gap-2">
                         <TimelineStatus label={t('ordersPage.board.columns.new')} time={order.created_at} color="text-zinc-400" />

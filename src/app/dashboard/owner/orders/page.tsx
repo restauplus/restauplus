@@ -25,7 +25,7 @@ export default async function OrdersPage() {
             tables ( number ),
             order_items (
                 *,
-                menu_items ( name )
+                menu_items ( name, price )
             )
         `)
         .eq('restaurant_id', profile.restaurant_id)
@@ -44,10 +44,10 @@ export default async function OrdersPage() {
 
     const metricsOrders = [...(activeOrders || []), ...(completedOrders || [])];
 
-    // 4. Fetch Restaurant Currency
+    // 4. Fetch Restaurant Info
     const { data: restaurant } = await supabase
         .from('restaurants')
-        .select('currency, is_taking_orders')
+        .select('name, logo_url, currency, is_taking_orders, address, phone, email_public, website_url')
         .eq('id', profile.restaurant_id)
         .single();
 
@@ -63,7 +63,17 @@ export default async function OrdersPage() {
             {/* Metrics Dashboard */}
             <KitchenMetrics orders={metricsOrders} />
 
-            <OrderBoard initialOrders={activeOrders || []} restaurantId={profile.restaurant_id} currency={currency} />
+            <OrderBoard
+                initialOrders={activeOrders || []}
+                restaurantId={profile.restaurant_id}
+                currency={currency}
+                restaurantName={restaurant?.name}
+                restaurantLogo={restaurant?.logo_url}
+                restaurantAddress={restaurant?.address}
+                restaurantPhone={restaurant?.phone}
+                restaurantEmail={restaurant?.email_public}
+                restaurantWebsite={restaurant?.website_url}
+            />
         </div>
     );
 }

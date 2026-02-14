@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QRCodeSVG } from "qrcode.react";
-import { Loader2, Upload, ExternalLink, Save, Store, Palette, Phone, Globe, Image as ImageIcon, Instagram, Facebook, Link as LinkIcon, TrendingUp, Sparkles, Check } from "lucide-react";
+import { Loader2, Upload, ExternalLink, Save, Store, Palette, Phone, Globe, Image as ImageIcon, Instagram, Facebook, Link as LinkIcon, TrendingUp, Sparkles, Check, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { motion, AnimatePresence } from "framer-motion";
@@ -249,6 +249,7 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
         phone: restaurant?.phone || "",
         email_public: restaurant?.email_public || "",
         address: restaurant?.address || "",
+        google_maps_link: restaurant?.google_maps_link || "",
         instagram_url: restaurant?.instagram_url || "",
         facebook_url: restaurant?.facebook_url || "",
         website_url: restaurant?.website_url || "",
@@ -283,6 +284,7 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
                 phone: formData.phone,
                 email_public: formData.email_public,
                 address: formData.address,
+                google_maps_link: formData.google_maps_link,
                 instagram_url: formData.instagram_url,
                 facebook_url: formData.facebook_url,
                 website_url: formData.website_url,
@@ -582,6 +584,20 @@ export function SettingsClient({ restaurant }: { restaurant: any }) {
                                             placeholder="123 Food Street, City, Country"
                                             className="resize-none h-24 bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500"
                                         />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-zinc-300 rtl:text-start">Google Maps Link</Label>
+                                        <div className="relative">
+                                            <div className="absolute left-3 rtl:right-3 rtl:left-auto top-3 text-zinc-500">
+                                                <MapPin className="w-5 h-5" />
+                                            </div>
+                                            <Input
+                                                value={formData.google_maps_link}
+                                                onChange={(e) => setFormData({ ...formData, google_maps_link: e.target.value })}
+                                                placeholder="https://maps.app.goo.gl/..."
+                                                className="h-11 pl-10 rtl:pr-10 rtl:pl-3 bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-teal-500 focus-visible:border-teal-500 text-left"
+                                            />
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
