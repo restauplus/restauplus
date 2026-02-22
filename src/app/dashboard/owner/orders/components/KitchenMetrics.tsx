@@ -4,8 +4,48 @@ import { Card } from "@/components/ui/card";
 import { Clock, ChefHat, BellRing, UtensilsCrossed, Store, ShoppingBag } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 
-export function KitchenMetrics({ orders }: { orders: any[] }) {
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+
+export function KitchenMetrics({ orders, totalDailyDineIn, totalDailyTakeAway }: { orders: any[], totalDailyDineIn: number, totalDailyTakeAway: number }) {
     const { t } = useLanguage();
+    const [dineInCount, setDineInCount] = useState(totalDailyDineIn);
+    const [takeAwayCount, setTakeAwayCount] = useState(totalDailyTakeAway);
+    const supabase = createClient();
+
+    useEffect(() => {
+        // Sync with props if they change (e.g. initial load or revalidation)
+        setDineInCount(totalDailyDineIn);
+        setTakeAwayCount(totalDailyTakeAway);
+    }, [totalDailyDineIn, totalDailyTakeAway]);
+
+    useEffect(() => {
+        const channel = supabase
+            .channel('kitchen_metrics_realtime')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'orders'
+                },
+                (payload) => {
+                    const newOrder = payload.new;
+                    // Check if order is for today (optional, but good practice)
+                    // We assume all new inserts are for "today"
+                    if (!newOrder.order_type || newOrder.order_type === 'dine_in') {
+                        setDineInCount(prev => prev + 1);
+                    } else if (newOrder.order_type === 'takeaway') {
+                        setTakeAwayCount(prev => prev + 1);
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, []);
 
     const calculateAvgDiff = (startField: string, endField: string) => {
         let totalMins = 0;
@@ -89,7 +129,7 @@ export function KitchenMetrics({ orders }: { orders: any[] }) {
                             {t('ordersPage.metrics.totalDineIn')}
                         </p>
                         <p className="text-4xl font-black text-white tracking-tight mt-2">
-                            {orders?.filter(o => !o.order_type || o.order_type === 'dine_in').length || 0}
+                            {dineInCount}
                         </p>
                     </div>
                     <div className="relative z-10 w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500 border border-purple-500/20 shadow-[0_0_30px_-10px_rgba(168,85,247,0.4)] group-hover:scale-110 transition-transform duration-500">
@@ -106,7 +146,7 @@ export function KitchenMetrics({ orders }: { orders: any[] }) {
                             {t('ordersPage.metrics.totalTakeAway')}
                         </p>
                         <p className="text-4xl font-black text-white tracking-tight mt-2">
-                            {orders?.filter(o => o.order_type === 'takeaway').length || 0}
+                            {takeAwayCount}
                         </p>
                     </div>
                     <div className="relative z-10 w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20 shadow-[0_0_30px_-10px_rgba(59,130,246,0.4)] group-hover:scale-110 transition-transform duration-500">

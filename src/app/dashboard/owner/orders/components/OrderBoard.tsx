@@ -24,7 +24,7 @@ interface Order {
     ready_at?: string;
     served_at?: string;
     paid_at?: string;
-    customer_name?: string | null;
+    customer_phone?: string | null;
     table_number?: string | null;
     notes?: string | null;
     total_amount?: number;
@@ -133,7 +133,7 @@ export function OrderBoard({
                             // 3. System Notification
                             if (document.visibilityState === 'hidden' && 'Notification' in window && Notification.permission === 'granted') {
                                 new Notification(`New Order: ${tableInfo}`, {
-                                    body: `${newOrder.customer_name || 'Guest'} - ${newOrder.order_items?.length || 0} items`,
+                                    body: `${newOrder.customer_phone || 'Guest'} - ${newOrder.order_items?.length || 0} items`,
                                     icon: '/logo.png'
                                 });
                             }
@@ -709,9 +709,9 @@ function OrderCard({
                         </div>
 
                         <!-- CUSTOMER NAME PILL -->
-                        ${order.customer_name ? `
+                        ${order.customer_phone ? `
                             <div class="customer-section">
-                                <div class="customer-name">${order.customer_name}</div>
+                                <div class="customer-name">${order.customer_phone}</div>
                             </div>
                         ` : ''}
 
@@ -810,6 +810,294 @@ function OrderCard({
         }
     };
 
+    const handlePrintKitchen = () => {
+        const existingIframe = document.getElementById('kitchen-print-frame');
+        if (existingIframe) existingIframe.remove();
+
+        const iframe = document.createElement('iframe');
+        iframe.id = 'kitchen-print-frame';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+
+        const dateObj = new Date(order.created_at);
+        const time = `${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
+
+        const receiptHTML = `
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <title>Kitchen Ticket</title>
+                    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+                    <style>
+                        body {
+                            font-family: 'JetBrains Mono', monospace;
+                            margin: 0;
+                            padding: 0;
+                            width: 100%;
+                            background: #fff;
+                            color: #000;
+                        }
+                        @page { margin: 0; size: auto; }
+                        .ticket-container {
+                            width: 100%;
+                            padding: 10px 15px;
+                            box-sizing: border-box;
+                        }
+                        .header-box {
+                            text-align: center;
+                            border: 4px solid #000;
+                            padding: 15px;
+                            margin-bottom: 20px;
+                            border-radius: 12px;
+                            position: relative;
+                        }
+                        .order-type {
+                            font-size: 28px;
+                            font-weight: 800;
+                            text-transform: uppercase;
+                            background: #000;
+                            color: #fff;
+                            padding: 8px 16px;
+                            border-radius: 6px;
+                            display: inline-block;
+                            margin-bottom: 12px;
+                            letter-spacing: 2px;
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                        }
+                        .time-stamp {
+                            font-size: 18px; 
+                            font-weight: 700; 
+                            text-align: center;
+                            margin-bottom: 15px;
+                        }
+                        .meta-info {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            border-top: 3px dashed #000;
+                            padding-top: 15px;
+                            margin-top: 10px;
+                        }
+                        .order-id { font-size: 28px; font-weight: 800; }
+                        .table-num-wrap {
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                        }
+                        .table-label { font-size: 16px; text-transform: uppercase; font-weight: 800;}
+                        .table-num { 
+                            font-size: 32px; 
+                            font-weight: 800;
+                            background: #000;
+                            color: #fff;
+                            padding: 4px 12px;
+                            border-radius: 8px;
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                        }
+                        
+                        .items-list { width: 100%; margin-bottom: 20px; border-top: 4px solid #000; padding-top: 15px; }
+                        .item-row {
+                            display: flex;
+                            align-items: flex-start;
+                            margin-bottom: 15px;
+                            padding-bottom: 15px;
+                            border-bottom: 3px dashed #bbb;
+                        }
+                        .item-qty {
+                            font-size: 32px;
+                            font-weight: 800;
+                            min-width: 60px;
+                            text-align: left;
+                        }
+                        .item-qty-x { font-size: 20px; color: #555; }
+                        .item-details { flex: 1; }
+                        .item-name {
+                            font-size: 26px;
+                            font-weight: 800;
+                            line-height: 1.2;
+                            text-transform: uppercase;
+                            margin-bottom: 8px;
+                        }
+                        .item-variants {
+                            font-size: 18px;
+                            margin-top: 4px;
+                        }
+                        .variant-tag {
+                            display: inline-flex;
+                            align-items: center;
+                            border: 3px solid #000;
+                            padding: 4px 8px;
+                            border-radius: 6px;
+                            margin-right: 6px;
+                            margin-bottom: 6px;
+                            font-weight: 700;
+                            background: #f8f8f8;
+                        }
+                        .item-note-box {
+                            margin-top: 10px;
+                            padding: 10px 14px;
+                            border: 3px solid #000;
+                            border-left: 10px solid #000;
+                            font-size: 20px;
+                            font-weight: 800;
+                            background-color: #fff;
+                            display: inline-block;
+                            width: 100%;
+                            box-sizing: border-box;
+                        }
+                        .order-note-box {
+                            margin-top: 30px;
+                            margin-bottom: 20px;
+                            padding: 20px;
+                            border: 5px solid #000;
+                            border-radius: 12px;
+                            background: #f9f9f9;
+                            position: relative;
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                        }
+                        .order-note-title {
+                            position: absolute;
+                            top: -14px;
+                            left: 20px;
+                            background: #fff;
+                            padding: 0 10px;
+                            font-size: 16px;
+                            font-weight: 800;
+                            text-transform: uppercase;
+                            letter-spacing: 1px;
+                        }
+                        .order-note-content {
+                            font-size: 26px;
+                            font-weight: 800;
+                            margin-top: 5px;
+                            line-height: 1.4;
+                        }
+                        .footer {
+                            text-align: center;
+                            margin-top: 30px;
+                            padding-top: 20px;
+                            border-top: 4px solid #000;
+                            font-weight: 800;
+                        }
+                        .cut-line {
+                            border-top: 3px dashed #000;
+                            margin: 40px 0;
+                            text-align: center;
+                            position: relative;
+                        }
+                        .cut-line::after {
+                            content: "✂ CUT HERE ✂";
+                            position: absolute;
+                            top: -10px;
+                            left: 50%;
+                            transform: translateX(-50%);
+                            background: #fff;
+                            padding: 0 15px;
+                            font-size: 14px;
+                            color: #000;
+                            font-weight: 800;
+                        }
+                        .branding {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 6px;
+                            font-size: 14px;
+                            margin-top: 20px;
+                            margin-bottom: 20px;
+                        }
+                        .branding-logo {
+                            font-size: 22px;
+                            font-weight: 800;
+                            letter-spacing: 3px;
+                            background: #000;
+                            color: #fff;
+                            padding: 6px 14px;
+                            border-radius: 6px;
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="ticket-container">
+                        <div class="header-box">
+                            <div class="order-type">${(order.order_type || 'DINE IN').replace('_', ' ')}</div>
+                            <div class="time-stamp">TIME: ${time}</div>
+                            <div class="meta-info">
+                                <span class="order-id">#${order.id.slice(0, 4)}</span>
+                                ${order.order_type !== 'takeaway' ? `
+                                <div class="table-num-wrap">
+                                    <span class="table-label">Table</span>
+                                    <span class="table-num">${tableDisplay}</span>
+                                </div>` : ''}
+                            </div>
+                        </div>
+
+                        <div class="items-list">
+                            ${order.order_items.map(item => {
+            const { note, variants } = parseItemDetails(item.notes);
+            const variantsHtml = variants.length > 0 ?
+                `<div class="item-variants">${variants.map((v: any) =>
+                    `<span class="variant-tag">${v.groupName ? `${v.groupName}: ` : '+ '}${v.name}</span>`
+                ).join('')}</div>` : '';
+
+            const noteHtml = note ?
+                `<div class="item-note-box">⚠ ATTN: ${note}</div>` : '';
+
+            return `
+                                    <div class="item-row">
+                                        <div class="item-qty">${item.quantity}<span class="item-qty-x">x</span></div>
+                                        <div class="item-details">
+                                            <div class="item-name">${item.menu_items?.name || 'Unknown Item'}</div>
+                                            ${variantsHtml}
+                                            ${noteHtml}
+                                        </div>
+                                    </div>
+                                `;
+        }).join('')}
+                        </div>
+
+                        ${order.notes ? `
+                            <div class="order-note-box">
+                                <div class="order-note-title">⚡ INSTRUCTIONS ⚡</div>
+                                <div class="order-note-content">${order.notes}</div>
+                            </div>
+                        ` : ''}
+
+                        <div class="cut-line"></div>
+
+                        <div class="footer">
+                            <div class="branding">
+                                <div>POWERED BY</div>
+                                <div class="branding-logo">RESTAU PLUS</div>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                        window.onload = function() { window.print(); window.close(); }
+                    </script>
+                </body>
+            </html>
+        `;
+
+        if (iframe.contentWindow) {
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write(receiptHTML);
+            iframe.contentWindow.document.close();
+            setTimeout(() => {
+                if (iframe.contentWindow) {
+                    iframe.contentWindow.focus();
+                    iframe.contentWindow.print();
+                }
+            }, 500);
+        }
+    };
+
     return (
         <motion.div
             layoutId={order.id}
@@ -836,8 +1124,8 @@ function OrderCard({
                             <span className="text-xs text-zinc-500">•</span>
                             <span className="text-sm font-semibold text-white">{tableDisplay}</span>
                         </div>
-                        {order.customer_name && (
-                            <p className="text-sm text-zinc-300 font-medium">{order.customer_name}</p>
+                        {order.customer_phone && (
+                            <p className="text-sm text-zinc-300 font-medium">{order.customer_phone}</p>
                         )}
                         <div className={cn("flex items-center gap-1.5 text-xs font-medium pt-1", isLate ? "text-red-400" : "text-zinc-500")}>
                             <Clock className="w-3.5 h-3.5" />
@@ -846,6 +1134,9 @@ function OrderCard({
                     </div>
                     <div className="flex flex-col gap-2">
                         <div className="flex gap-2 justify-end">
+                            <Button size="icon" variant="outline" onClick={handlePrintKitchen} className="h-8 w-8 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20 text-amber-500" title="Print Kitchen Ticket">
+                                <ChefHat className="w-4 h-4" />
+                            </Button>
                             <Button size="icon" variant="outline" onClick={handlePrint} className="h-8 w-8 bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-zinc-400" title="Print Bill">
                                 <Printer className="w-4 h-4" />
                             </Button>

@@ -10,9 +10,12 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChefHat } from 'lucide-react';
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { useLanguage } from "@/context/language-context";
 
 export const Navbar = () => {
     const { scrollYProgress } = useScroll();
+    const { t } = useLanguage();
     const [visible, setVisible] = useState(true);
 
     useMotionValueEvent(scrollYProgress, "change", (current) => {
@@ -55,39 +58,36 @@ export const Navbar = () => {
                     <img src="/logo.png" alt="RESTAU PLUS" className="h-8 md:h-10 w-auto object-contain" />
                 </Link>
                 <div className="hidden md:flex items-center gap-6 text-sm font-medium text-neutral-300">
-                    <Link href="#pricing" className="hover:text-white transition-colors">Pricing</Link>
-                    <Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link>
+                    <Link href="#pricing" className="hover:text-white transition-colors">{t('landing.navbar.pricing')}</Link>
+                    <Link href="/contact" className="hover:text-white transition-colors">{t('landing.navbar.contact')}</Link>
                 </div>
 
                 <div className="flex items-center gap-2 pl-2 md:pl-4 border-l border-white/10">
+                    <LanguageSwitcher />
+
                     <Link href="/dashboard/owner">
-                        <Button variant="ghost" size="sm" className="hidden sm:inline-flex text-neutral-300 hover:text-white hover:bg-white/10 rounded-full">
-                            Login
+                        <Button variant="ghost" size="sm" className="hidden sm:inline-flex text-neutral-300 hover:text-white hover:bg-white/10 rounded-full h-8 px-4 text-xs md:text-sm font-medium transition-colors">
+                            {t('landing.navbar.login')}
                         </Button>
                     </Link>
 
                     <Link href="/register">
                         <Button size="sm" className="hidden sm:inline-flex rounded-full bg-white text-black hover:bg-gray-200 h-8 px-4 text-xs md:text-sm font-medium transition-colors">
-                            Sign Up
+                            {t('landing.navbar.signup')}
                         </Button>
                     </Link>
 
-                    {/* Mobile: Pricing Link */}
-                    <Link href="#pricing" className="md:hidden text-xs font-medium text-neutral-300 hover:text-white mr-1 px-2">
-                        Pricing
-                    </Link>
-
                     {/* Mobile: Login Pill */}
-                    <Link href="/dashboard/owner" className="md:hidden">
+                    <Link href="/dashboard/owner" className="sm:hidden">
                         <Button variant="ghost" size="sm" className="rounded-full text-neutral-300 hover:text-white hover:bg-white/10 h-8 px-3 text-xs">
-                            Login
+                            {t('landing.navbar.login')}
                         </Button>
                     </Link>
 
                     {/* Mobile: Sign Up Pill */}
-                    <Link href="/register" className="md:hidden">
+                    <Link href="/register" className="sm:hidden">
                         <Button size="sm" className="rounded-full bg-white text-black hover:bg-gray-200 h-8 px-3 text-xs">
-                            Sign Up
+                            {t('landing.navbar.signup')}
                         </Button>
                     </Link>
                 </div>

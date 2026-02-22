@@ -22,7 +22,8 @@ import {
     IconSearch,
     IconBell,
     IconMenu2,
-    IconRocket
+    IconRocket,
+    IconLockSquare
 } from '@tabler/icons-react'
 import { toast } from 'sonner'
 
@@ -37,11 +38,23 @@ export default function RegisterPage() {
         slug: '',
     })
     const [loading, setLoading] = useState(false)
-    const [googleLoading, setGoogleLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [registrationsOpen, setRegistrationsOpen] = useState<boolean | null>(null)
     const { user: authUser, isLoading: authLoading } = useAuth()
     const router = useRouter()
     const supabase = createClient()
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            const { data } = await supabase.from('platform_settings').select('allow_registrations').eq('id', 1).single()
+            if (data) {
+                setRegistrationsOpen(data.allow_registrations)
+            } else {
+                setRegistrationsOpen(true) // default to open if failed
+            }
+        }
+        fetchSettings()
+    }, [supabase])
 
     // 1. Auto-Forward if already logged in
     useEffect(() => {
@@ -108,189 +121,153 @@ export default function RegisterPage() {
         }
     }
 
-    const handleGoogleLogin = async () => {
-        setGoogleLoading(true)
-        setError(null)
-        try {
-            const currentOrigin = window.location.origin;
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: `${currentOrigin}/auth/callback`,
-                },
-            })
-
-            if (error) {
-                console.error("Google Auth Error:", error);
-                setError(error.message)
-                toast.error(error.message)
-            } else if (data?.url) {
-                toast.success('Handing over to Google...')
-                window.location.href = data.url;
-            }
-        } catch (err) {
-            setError('Google registration failed')
-            toast.error('Connection to Google failed')
-        } finally {
-            setTimeout(() => setGoogleLoading(false), 2000);
-        }
-    }
-
     return (
         <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-black overflow-hidden font-sans">
             {/* Left Side: Auth Form */}
             <div className="flex flex-col justify-center items-center p-8 lg:p-16 z-10 relative overflow-y-auto custom-scrollbar">
-                <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="w-full max-w-md space-y-6 mt-4 mb-6 lg:space-y-10 lg:my-8"
-                >
-                    {/* Logo */}
-
-                    <Link href="/" className="inline-flex items-center gap-3 group">
-                        <img
-                            src="/logo.png"
-                            alt="RESTAU PLUS"
-                            className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-                        />
-                    </Link>
-
-                    <div className="space-y-2">
-                        <h1 className="text-4xl font-extrabold tracking-tighter text-white">Get Started</h1>
-                        <p className="text-muted-foreground font-medium">Start your 7-day free trial in seconds</p>
-                    </div>
-
-                    <div className="space-y-6">
-                        <form onSubmit={handleSubmit} className="space-y-5">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="fullName" className="text-sm font-semibold text-white/70 ml-1">Full Name</Label>
-                                    <Input
-                                        id="fullName"
-                                        placeholder="Your Full Name"
-                                        required
-                                        className="h-14 bg-white/5 border-white/10 focus:border-primary/50 rounded-2xl px-5 text-base transition-all placeholder:text-white/20"
-                                        value={formData.fullName}
-                                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="email" className="text-sm font-semibold text-white/70 ml-1">Email</Label>
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        placeholder="name@restaurant.com"
-                                        required
-                                        className="h-14 bg-white/5 border-white/10 focus:border-primary/50 rounded-2xl px-5 text-base transition-all placeholder:text-white/20"
-                                        value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Phone Number Input Section */}
-                            <div className="space-y-2">
-                                <Label htmlFor="phoneNumber" className="text-sm font-semibold text-white/70 ml-1">Phone Number</Label>
-                                <div className="flex gap-2">
-                                    {/* Country Code Selector */}
-                                    <div className="w-[110px] shrink-0">
-                                        <select
-                                            className="w-full h-14 bg-white/5 border border-white/10 focus:border-primary/50 rounded-2xl px-3 text-base text-white outline-none appearance-none cursor-pointer"
-                                            value={formData.countryCode}
-                                            onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
-                                        >
-                                            <option value="+974" className="bg-zinc-900">🇶🇦 +974</option>
-                                            <option value="+212" className="bg-zinc-900">🇲🇦 +212</option>
-                                        </select>
-                                    </div>
-
-                                    {/* Phone Input */}
-                                    <Input
-                                        id="phoneNumber"
-                                        type="tel"
-                                        placeholder="Enter your number"
-                                        required
-                                        className="h-14 bg-white/5 border-white/10 focus:border-primary/50 rounded-2xl px-5 text-base transition-all placeholder:text-white/20 flex-1"
-                                        value={formData.phoneNumber}
-                                        onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="restaurantName" className="text-sm font-semibold text-white/70 ml-1">Restaurant Name</Label>
-                                <Input
-                                    id="restaurantName"
-                                    placeholder="The Fine Dining"
-                                    required
-                                    className="h-14 bg-white/5 border-white/10 focus:border-primary/50 rounded-2xl px-5 text-base transition-all placeholder:text-white/20"
-                                    value={formData.restaurantName}
-                                    onChange={(e) => setFormData({ ...formData, restaurantName: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="password" className="text-sm font-semibold text-white/70 ml-1">Password</Label>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    placeholder="Create a strong password"
-                                    required
-                                    className="h-14 bg-white/5 border-white/10 focus:border-primary/50 rounded-2xl px-5 text-base transition-all placeholder:text-white/20"
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                />
-                            </div>
-
-                            <Button
-                                className="w-full h-14 bg-primary hover:bg-primary/90 text-white rounded-2xl text-lg font-bold shadow-xl shadow-primary/20 transition-all active:scale-[0.98]"
-                                type="submit"
-                                disabled={loading || googleLoading}
-                            >
-                                {loading ? (
-                                    <IconLoader2 className="w-6 h-6 animate-spin" />
-                                ) : (
-                                    <div className="flex items-center justify-center gap-2">
-                                        Launch My Restaurant
-                                        <IconRocket className="w-5 h-5 text-glow-primary" />
-                                    </div>
-                                )}
+                {(registrationsOpen === false) ? (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="w-full max-w-md space-y-6 text-center"
+                    >
+                        <div className="mx-auto w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-6">
+                            <IconLockSquare className="w-8 h-8 text-red-500" />
+                        </div>
+                        <h1 className="text-3xl font-extrabold tracking-tighter text-white">Registrations Closed</h1>
+                        <p className="text-zinc-400 font-medium">New signups are currently disabled by the administration. Please contact support if you need access.</p>
+                        <Link href="/">
+                            <Button className="mt-6 w-full h-12 bg-white/10 hover:bg-white/20 text-white rounded-xl">
+                                Return to Homepage
                             </Button>
-                        </form>
+                        </Link>
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="w-full max-w-md space-y-6 mt-4 mb-6 lg:space-y-10 lg:my-8"
+                    >
+                        {/* Logo */}
 
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                                <span className="w-full border-t border-white/5" />
-                            </div>
-                            <div className="relative flex justify-center text-xs uppercase tracking-[0.2em]">
-                                <span className="bg-black px-4 text-white/30 font-bold">OR</span>
-                            </div>
+                        <Link href="/" className="inline-flex items-center gap-3 group">
+                            <img
+                                src="/logo.png"
+                                alt="RESTAU PLUS"
+                                className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                            />
+                        </Link>
+
+                        <div className="space-y-2">
+                            <h1 className="text-4xl font-extrabold tracking-tighter text-white">Get Started</h1>
+                            <p className="text-muted-foreground font-medium">Start your 7-day free trial in seconds</p>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-4">
-                            <Button
-                                onClick={handleGoogleLogin}
-                                disabled={googleLoading || loading}
-                                variant="outline"
-                                className="w-full h-14 bg-white/5 border-white/10 hover:bg-white/10 hover:border-primary/50 text-white rounded-2xl transition-all font-bold tracking-tight text-base"
-                            >
-                                {googleLoading ? (
-                                    <IconLoader2 className="w-6 h-6 animate-spin" />
-                                ) : (
-                                    <div className="flex items-center justify-center gap-3">
-                                        <IconBrandGoogle className="w-6 h-6" />
-                                        Continue with Google
+                        <div className="space-y-6">
+                            <form onSubmit={handleSubmit} className="space-y-5">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="fullName" className="text-sm font-semibold text-white/70 ml-1">Full Name</Label>
+                                        <Input
+                                            id="fullName"
+                                            placeholder="Your Full Name"
+                                            required
+                                            className="h-14 bg-white/5 border-white/10 focus:border-primary/50 rounded-2xl px-5 text-base transition-all placeholder:text-white/20"
+                                            value={formData.fullName}
+                                            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                                        />
                                     </div>
-                                )}
-                            </Button>
-                        </div>
-                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="email" className="text-sm font-semibold text-white/70 ml-1">Email</Label>
+                                        <Input
+                                            id="email"
+                                            type="email"
+                                            placeholder="name@restaurant.com"
+                                            required
+                                            className="h-14 bg-white/5 border-white/10 focus:border-primary/50 rounded-2xl px-5 text-base transition-all placeholder:text-white/20"
+                                            value={formData.email}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
 
-                    <p className="text-center text-white/50 font-medium">
-                        Already have an account?{' '}
-                        <Link href="/login" className="text-white font-bold hover:text-primary transition-colors hover:underline underline-offset-8">Sign In</Link>
-                    </p>
-                </motion.div>
+                                {/* Phone Number Input Section */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="phoneNumber" className="text-sm font-semibold text-white/70 ml-1">Phone Number</Label>
+                                    <div className="flex gap-2">
+                                        {/* Country Code Selector */}
+                                        <div className="w-[110px] shrink-0">
+                                            <select
+                                                className="w-full h-14 bg-white/5 border border-white/10 focus:border-primary/50 rounded-2xl px-3 text-base text-white outline-none appearance-none cursor-pointer"
+                                                value={formData.countryCode}
+                                                onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
+                                            >
+                                                <option value="+974" className="bg-zinc-900">🇶🇦 +974</option>
+                                                <option value="+212" className="bg-zinc-900">🇲🇦 +212</option>
+                                            </select>
+                                        </div>
+
+                                        {/* Phone Input */}
+                                        <Input
+                                            id="phoneNumber"
+                                            type="tel"
+                                            placeholder="Enter your number"
+                                            required
+                                            className="h-14 bg-white/5 border-white/10 focus:border-primary/50 rounded-2xl px-5 text-base transition-all placeholder:text-white/20 flex-1"
+                                            value={formData.phoneNumber}
+                                            onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="restaurantName" className="text-sm font-semibold text-white/70 ml-1">Restaurant Name</Label>
+                                    <Input
+                                        id="restaurantName"
+                                        placeholder="The Fine Dining"
+                                        required
+                                        className="h-14 bg-white/5 border-white/10 focus:border-primary/50 rounded-2xl px-5 text-base transition-all placeholder:text-white/20"
+                                        value={formData.restaurantName}
+                                        onChange={(e) => setFormData({ ...formData, restaurantName: e.target.value })}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="password" className="text-sm font-semibold text-white/70 ml-1">Password</Label>
+                                    <Input
+                                        id="password"
+                                        type="password"
+                                        placeholder="Create a strong password"
+                                        required
+                                        className="h-14 bg-white/5 border-white/10 focus:border-primary/50 rounded-2xl px-5 text-base transition-all placeholder:text-white/20"
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    />
+                                </div>
+
+                                <Button
+                                    className="w-full h-14 bg-primary hover:bg-primary/90 text-white rounded-2xl text-lg font-bold shadow-xl shadow-primary/20 transition-all active:scale-[0.98]"
+                                    type="submit"
+                                    disabled={loading}
+                                >
+                                    {loading ? (
+                                        <IconLoader2 className="w-6 h-6 animate-spin" />
+                                    ) : (
+                                        <div className="flex items-center justify-center gap-2">
+                                            Launch My Restaurant
+                                            <IconRocket className="w-5 h-5 text-glow-primary" />
+                                        </div>
+                                    )}
+                                </Button>
+                            </form>
+                        </div>
+
+                        <p className="text-center text-white/50 font-medium">
+                            Already have an account?{' '}
+                            <Link href="/login" className="text-white font-bold hover:text-primary transition-colors hover:underline underline-offset-8">Sign In</Link>
+                        </p>
+                    </motion.div>
+                )}
             </div>
 
             {/* Right Side: Immersive Visual Dashboard Mockup */}

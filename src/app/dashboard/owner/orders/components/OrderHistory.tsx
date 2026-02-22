@@ -54,7 +54,7 @@ export function OrderHistory({ open, onOpenChange, restaurantId, currency }: { o
 
 
     const filtered = orders.filter(o =>
-        o.customer_name?.toLowerCase().includes(search.toLowerCase()) ||
+        o.customer_phone?.toLowerCase().includes(search.toLowerCase()) ||
         o.id.includes(search)
     );
 
@@ -111,7 +111,7 @@ export function OrderHistory({ open, onOpenChange, restaurantId, currency }: { o
                                                 <Badge variant="outline" className="border-teal-500/30 text-teal-400 bg-teal-500/5">
                                                     ID: {order.id.slice(0, 4)}
                                                 </Badge>
-                                                <span className="font-semibold text-lg text-zinc-200">{order.customer_name || 'Guest'}</span>
+                                                <span className="font-semibold text-lg text-zinc-200">{order.customer_phone || 'Guest'}</span>
                                                 <span className="text-xs text-zinc-500 flex items-center gap-1.5 ml-1 border-l border-zinc-800 pl-3">
                                                     <Clock className="w-3.5 h-3.5" />
                                                     {new Date(order.created_at).toLocaleString(undefined, {

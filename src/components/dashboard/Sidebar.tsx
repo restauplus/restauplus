@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, UtensilsCrossed, ClipboardList, Settings, ChefHat, LogOut, Shield, Truck, Network, ExternalLink, MessageCircle, Users, Headset, ChevronsLeft, ChevronsRight, MessageSquare, Globe } from "lucide-react";
+import { LayoutDashboard, UtensilsCrossed, ClipboardList, Settings, ChefHat, LogOut, Shield, Truck, Network, ExternalLink, MessageCircle, Users, Headset, ChevronsLeft, ChevronsRight, MessageSquare, Globe, History } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/auth-context";
 import { useLanguage } from "@/context/language-context";
@@ -23,6 +23,7 @@ export function Sidebar({ className, mobile, isCollapsed, onToggle }: { classNam
     const sidebarItems = [
         { name: t('sidebar.overview'), href: "/dashboard/owner", icon: LayoutDashboard },
         { name: t('sidebar.orders'), href: "/dashboard/owner/orders", icon: ClipboardList },
+        { name: 'Orders History', href: "/dashboard/owner/history", icon: History },
         { name: t('sidebar.clients'), href: "/dashboard/owner/clients", icon: Users },
         { name: t('sidebar.menu'), href: "/dashboard/owner/menu", icon: UtensilsCrossed },
         { name: t('sidebar.chatbot'), href: "/dashboard/owner/chatbot", icon: MessageCircle, badge: t('sidebar.new') },

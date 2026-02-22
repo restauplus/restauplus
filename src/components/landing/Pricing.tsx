@@ -4,8 +4,10 @@ import { motion } from "framer-motion";
 import { Check, ArrowRight, Zap, Star, Shield, Rocket, Flame, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useLanguage } from "@/context/language-context";
 
 export function Pricing() {
+    const { t } = useLanguage();
     return (
         <section id="pricing" className="relative py-12 bg-black overflow-hidden selection:bg-purple-500/30">
             {/* Background Effects - x9999 Dynamic */}
@@ -26,7 +28,7 @@ export function Pricing() {
                         className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-orange-500/20 to-purple-500/20 border border-white/10 text-sm font-bold uppercase tracking-widest text-white shadow-[0_0_20px_rgba(168,85,247,0.4)]"
                     >
                         <Flame className="w-4 h-4 text-orange-500 fill-orange-500 animate-pulse" />
-                        Founders Launch Event
+                        {t('landing.pricing.badge')}
                     </motion.div>
 
                     <motion.h2
@@ -36,8 +38,8 @@ export function Pricing() {
                         transition={{ delay: 0.1 }}
                         className="text-3xl md:text-5xl font-black tracking-tighter text-white"
                     >
-                        Choose Your<br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-200 to-zinc-400">Path to Dominance</span>
+                        {t('landing.pricing.titleLine1')}<br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-200 to-zinc-400">{t('landing.pricing.titleLine2')}</span>
                     </motion.h2>
                 </div>
 
@@ -54,22 +56,16 @@ export function Pricing() {
                     >
                         <div className="h-full bg-zinc-900/50 backdrop-blur-sm rounded-2xl border border-white/10 p-5 flex flex-col hover:border-white/20 transition-all duration-300">
                             <div className="mb-4">
-                                <h3 className="text-lg font-bold text-zinc-400 mb-1">Monthly Pro</h3>
+                                <h3 className="text-lg font-bold text-zinc-400 mb-1">{t('landing.pricing.monthly.title')}</h3>
                                 <div className="flex items-baseline gap-2">
-                                    <span className="text-3xl font-black text-white">499 QAR</span>
-                                    <span className="text-zinc-500 font-medium text-sm">/mo</span>
+                                    <span className="text-3xl font-black text-white">{t('landing.pricing.monthly.price')}</span>
+                                    <span className="text-zinc-500 font-medium text-sm">{t('landing.pricing.monthly.period')}</span>
                                 </div>
-                                <div className="text-xs text-zinc-500 line-through mt-0.5">was 800 QAR</div>
+                                <div className="text-xs text-zinc-500 line-through mt-0.5">{t('landing.pricing.monthly.was')}</div>
                             </div>
 
                             <ul className="space-y-2 mb-6 flex-1">
-                                {[
-                                    "Real-time Dashboard",
-                                    "Unlimited QR Scans",
-                                    "Inventory & Stock",
-                                    "Staff Management",
-                                    "Standard Support"
-                                ].map((feature, i) => (
+                                {(t('landing.pricing.monthly.features') as unknown as string[]).map((feature, i) => (
                                     <li key={i} className="flex items-center gap-3 text-sm text-zinc-300">
                                         <Check className="w-4 h-4 text-zinc-500" />
                                         {feature}
@@ -79,7 +75,7 @@ export function Pricing() {
 
                             <Link href="/register?plan=monthly" className="w-full">
                                 <Button className="w-full h-10 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-lg text-sm active:scale-95 transition-all">
-                                    Select Monthly
+                                    {t('landing.pricing.monthly.button')}
                                 </Button>
                             </Link>
                         </div>
@@ -98,7 +94,7 @@ export function Pricing() {
 
                         <div className="absolute top-0 inset-x-0 flex justify-center z-30">
                             <span className="bg-gradient-to-r from-orange-500 to-purple-600 text-white text-[10px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-b-xl shadow-lg shadow-orange-500/20">
-                                Most Popular Choice
+                                {t('landing.pricing.trial.popularBadge')}
                             </span>
                         </div>
 
@@ -110,30 +106,24 @@ export function Pricing() {
                                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-purple-600 text-white mb-3 shadow-lg shadow-orange-500/30">
                                     <Crown className="w-6 h-6 fill-current" />
                                 </div>
-                                <h3 className="text-xl font-black text-white mb-1">Founders Launch</h3>
+                                <h3 className="text-xl font-black text-white mb-1">{t('landing.pricing.trial.title')}</h3>
                                 <div className="flex flex-col items-center">
                                     <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-purple-400">
-                                        FREE
+                                        {t('landing.pricing.trial.price')}
                                     </div>
-                                    <span className="text-zinc-400 font-bold uppercase tracking-widest text-[10px] mt-0.5">For 10 Days</span>
+                                    <span className="text-zinc-400 font-bold uppercase tracking-widest text-[10px] mt-0.5">{t('landing.pricing.trial.period')}</span>
                                 </div>
                             </div>
 
                             <div className="bg-white/5 rounded-lg p-3 mb-5 border border-white/10 relative overflow-hidden">
-                                <div className="absolute top-0 left-0 w-1 h-full bg-orange-500" />
+                                <div className="absolute top-0 left-0 w-1 h-full bg-orange-500 rtl:right-0 rtl:left-auto" />
                                 <p className="text-xs font-medium text-zinc-300 text-center leading-relaxed">
-                                    "Experience the full power of Restau Plus Pro with absolutely zero risk."
+                                    {t('landing.pricing.trial.quote')}
                                 </p>
                             </div>
 
                             <ul className="space-y-2 mb-6">
-                                {[
-                                    "Access to ALL Pro Features",
-                                    "Priority Onboarding Setup",
-                                    "No Credit Card Required",
-                                    "Valid for First 10 Restaurants",
-                                    "Cancel Anytime"
-                                ].map((feature, i) => (
+                                {(t('landing.pricing.trial.features') as unknown as string[]).map((feature, i) => (
                                     <li key={i} className="flex items-center gap-2 text-xs font-bold text-white">
                                         <div className="w-4 h-4 rounded-full bg-orange-500 flex items-center justify-center shrink-0">
                                             <Check className="w-2.5 h-2.5 text-white stroke-[3px]" />
@@ -145,15 +135,15 @@ export function Pricing() {
 
                             <Link href="/register?plan=trial" className="w-full">
                                 <Button className="w-full h-11 bg-gradient-to-r from-orange-500 to-purple-600 hover:from-orange-400 hover:to-purple-500 text-white font-black uppercase tracking-wider rounded-lg text-sm shadow-[0_0_20px_rgba(249,115,22,0.4)] hover:shadow-[0_0_30px_rgba(168,85,247,0.6)] active:scale-95 transition-all duration-300 group">
-                                    Start Free Trial
-                                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                    {t('landing.pricing.trial.button')}
+                                    <ArrowRight className="w-4 h-4 ml-2 rtl:mr-2 rtl:ml-0 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
                                 </Button>
                             </Link>
 
                             <div className="text-center mt-4">
                                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest animate-pulse">
-                                    <span className="text-red-500 mr-2">●</span>
-                                    Only 3 Spots Remaining
+                                    <span className="text-red-500 mr-2 rtl:mr-0 rtl:ml-2">●</span>
+                                    {t('landing.pricing.trial.spotsRemaining')}
                                 </p>
                             </div>
                         </div>
@@ -173,25 +163,18 @@ export function Pricing() {
                             </div>
 
                             <div className="mb-4">
-                                <h3 className="text-lg font-bold text-purple-400 mb-1">Yearly Elite Pro</h3>
+                                <h3 className="text-lg font-bold text-purple-400 mb-1">{t('landing.pricing.yearly.title')}</h3>
                                 <div className="flex items-baseline gap-2">
-                                    <span className="text-3xl font-black text-white">4850 QAR</span>
-                                    <span className="text-zinc-500 font-medium text-sm">/yr</span>
+                                    <span className="text-3xl font-black text-white">{t('landing.pricing.yearly.price')}</span>
+                                    <span className="text-zinc-500 font-medium text-sm">{t('landing.pricing.yearly.period')}</span>
                                 </div>
                                 <div className="inline-block mt-1 px-1.5 py-0.5 rounded bg-green-500/20 text-green-400 text-[10px] font-bold">
-                                    ~404 QAR/mo (Best Value)
+                                    {t('landing.pricing.yearly.bestValue')}
                                 </div>
                             </div>
 
                             <ul className="space-y-2 mb-6 flex-1">
-                                {[
-                                    "Everything in Monthly",
-                                    "Locked-in Discount Rate",
-                                    "Dedicated Account Manager",
-                                    "Advanced Analytics Suite",
-                                    "Custom Branding Options",
-                                    "Save 1138 QAR Yearly"
-                                ].map((feature, i) => (
+                                {(t('landing.pricing.yearly.features') as unknown as string[]).map((feature, i) => (
                                     <li key={i} className="flex items-center gap-2 text-xs text-zinc-300">
                                         <Check className="w-3.5 h-3.5 text-purple-500" />
                                         {feature}
@@ -201,7 +184,7 @@ export function Pricing() {
 
                             <Link href="/register?plan=yearly" className="w-full">
                                 <Button className="w-full h-10 bg-white/5 hover:bg-purple-600 hover:text-white border border-white/10 hover:border-purple-500 text-white font-bold rounded-lg text-sm active:scale-95 transition-all">
-                                    Go Elite Yearly
+                                    {t('landing.pricing.yearly.button')}
                                 </Button>
                             </Link>
                         </div>
@@ -211,10 +194,10 @@ export function Pricing() {
                 {/* Secure Badge / Features */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-10 border-t border-white/5">
                     {[
-                        { icon: Shield, title: "Secure Payment" },
-                        { icon: Rocket, title: "Instant Activation" },
-                        { icon: Zap, title: "Cancel Anytime" },
-                        { icon: Star, title: "24/7 Priority Support" }
+                        { icon: Shield, title: t('landing.pricing.badges.secure') },
+                        { icon: Rocket, title: t('landing.pricing.badges.instant') },
+                        { icon: Zap, title: t('landing.pricing.badges.cancel') },
+                        { icon: Star, title: t('landing.pricing.badges.support') }
                     ].map((item, i) => (
                         <div key={i} className="flex items-center justify-center gap-3 opacity-50 hover:opacity-100 transition-opacity">
                             <item.icon className="w-5 h-5" />

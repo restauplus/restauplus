@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useLanguage } from "@/context/language-context";
 
 interface ProfitCalendarProps {
@@ -63,30 +63,32 @@ export function ProfitCalendar({ data, currency }: ProfitCalendarProps) {
                         const count = dayData?.count || 0;
 
                         return (
-                            <TooltipProvider key={day}>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <motion.div
-                                            whileHover={{ scale: 1.1 }}
-                                            className={cn(
-                                                "aspect-square rounded-md flex items-center justify-center text-xs cursor-pointer transition-colors relative group",
-                                                getIntensity(profit),
-                                                profit > 0 ? "text-white font-bold" : "text-zinc-600"
-                                            )}
-                                        >
-                                            {day}
-                                            {/* Glow effect on hover */}
-                                            {profit > 0 && <div className="absolute inset-0 bg-teal-400/20 blur-md rounded-md opacity-0 group-hover:opacity-100 transition-opacity" />}
-                                        </motion.div>
-                                    </TooltipTrigger>
-                                    <TooltipContent className="bg-zinc-950 border-zinc-800 text-white">
-                                        <div className="text-center">
-                                            <p className="font-bold text-teal-400">{currency}{profit.toLocaleString()}</p>
-                                            <p className="text-xs text-zinc-400">{count} {t('calendar.orders')}</p>
-                                        </div>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
+                            <Popover key={day}>
+                                <PopoverTrigger asChild>
+                                    <motion.div
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        className={cn(
+                                            "aspect-square rounded-md flex items-center justify-center text-xs cursor-pointer transition-colors relative group",
+                                            getIntensity(profit),
+                                            profit > 0 ? "text-white font-bold" : "text-zinc-600"
+                                        )}
+                                    >
+                                        {day}
+                                        {/* Glow effect on hover */}
+                                        {profit > 0 && <div className="absolute inset-0 bg-teal-400/20 blur-md rounded-md opacity-0 group-hover:opacity-100 transition-opacity" />}
+                                    </motion.div>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                    className="w-auto p-3 bg-zinc-950 border-zinc-800 text-white z-50 rounded-lg shadow-xl shadow-black/50"
+                                    sideOffset={5}
+                                >
+                                    <div className="text-center">
+                                        <p className="font-bold text-teal-400 text-lg">{currency}{profit.toLocaleString()}</p>
+                                        <p className="text-xs text-zinc-400 font-medium">{count} {t('calendar.orders')}</p>
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
                         );
                     })}
                 </div>

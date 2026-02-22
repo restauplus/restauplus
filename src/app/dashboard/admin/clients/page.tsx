@@ -20,6 +20,16 @@ export default async function AdminClientsPage() {
 
     // Fetch All User Profiles using RPC (bypasses PostgREST schema cache issues)
     const { data: profiles, error } = await supabase.rpc('get_all_profiles_with_restaurant');
+    const { data: profilePlans } = await supabase.from('profiles').select('id, plan_type');
+
+    // Merge plan_type into profiles
+    const mergedProfiles = profiles?.map((p: any) => {
+        const planData = profilePlans?.find((plan: any) => plan.id === p.id);
+        return {
+            ...p,
+            plan_type: planData?.plan_type || 'restaurant_trial'
+        };
+    }) || [];
 
     if (error) {
         console.error('RPC Error:', error);
@@ -39,7 +49,7 @@ export default async function AdminClientsPage() {
                 <p className="text-zinc-500 text-lg">Detailed list of all platform users and their access status.</p>
             </div>
 
-            <AdminUserList initialProfiles={profiles || []} />
+            <AdminUserList initialProfiles={mergedProfiles} />
         </div>
     );
 }

@@ -238,6 +238,277 @@ export const translations = {
                 print: "Print PDF",
                 view: "View Live Site"
             }
+        },
+        landing: {
+            navbar: {
+                pricing: "Pricing",
+                contact: "Contact Us",
+                login: "Login",
+                signup: "Sign Up"
+            },
+            dashboardDemo: {
+                badge: "The Future is Here",
+                titleLine1: "All-in-one tech platform",
+                titleLine2: "for",
+                titleLineHighlight: "Restaurants",
+                description: "Replace 5 fragmented tools with one powerful operating system. Built for speed, designed for scale.",
+                startTrial: "Start Free Trial",
+                watchDemo: "Watch Demo",
+                scaled: "Restaurants Scaled",
+                rating: "Customer Rating"
+            },
+            ecosystemStrip: {
+                pos: "Point of Sale (POS)",
+                website: "Branded Website and App",
+                ordering: "Online Ordering",
+                integrations: "Integrations",
+                qr: "QR Code Table Ordering",
+                reservations: "Table Reservations",
+                loyalty: "Loyalty Program"
+            },
+            features: {
+                badge: "Not Just A Menu",
+                titleLine1: "More Than Just a",
+                titleLine2: "Digital Ecosystem",
+                descriptionLine1: "RESTAU PLUS reconstructs your entire operation into a single, seamless flow.",
+                descriptionLine2: "From the first scan to the final profit analysis.",
+                items: {
+                    qr: {
+                        title: "Instant QR Ordering",
+                        desc: "Scan, order, and pay. No apps to download. Pure speed that delights customers."
+                    },
+                    upsell: {
+                        title: "Smart Upselling",
+                        desc: "AI-powered recommendations that boost check size by 20%."
+                    },
+                    kds: {
+                        title: "Kitchen Display",
+                        desc: "Real-time order syncing directly to your kitchen. Eliminate errors."
+                    },
+                    analytics: {
+                        title: "Real-time Analytics",
+                        desc: "Watch your revenue grow in real-time. Make decisions based on data, not guesses."
+                    },
+                    staff: {
+                        title: "Staff Management",
+                        desc: "Track performance, manage shifts, and optimize your team's efficiency."
+                    }
+                }
+            },
+            rplusMarketing: {
+                badge: "R+ Marketing For Restaurants",
+                titleLine1: "Turn Walk-ins Into",
+                titleLine2: "Lifelong Loyal Clients",
+                description: "Stop guessing. Start knowing. We seamlessly collect your customers' data and empower you to retarget them with irresistible offers to secure their return.",
+                steps: {
+                    s1: {
+                        title: "1. Effortless Data Collection",
+                        desc: "Every time a customer interacts with your digital menu or places an order, their profile is automatically built within your database."
+                    },
+                    s2: {
+                        title: "2. Precision Retargeting",
+                        desc: "Launch targeted SMS and Email campaigns. Send VIP discounts or 'We Miss You' offers directly to their phones."
+                    },
+                    s3: {
+                        title: "3. Skyrocket Conversions",
+                        desc: "Watch your return rate multiply. Secure their loyalty and turn occasional diners into regular brand advocates."
+                    }
+                },
+                dashboard: {
+                    title: "Campaign Manager",
+                    activeFlow: "Active Retargeting Flow",
+                    active: "Active",
+                    sendingOffer: "Sending 20% Offer...",
+                    offerRedeemed: "Offer Redeemed",
+                    vipStatus: "VIP Status Unlocked",
+                    newProfiles: "New Profiles Captured",
+                    thisMonth: "This Month",
+                    returnRate: "Return Rate Increased",
+                    fromRetargeting: "From Retargeting"
+                }
+            },
+            hotelRoomService: {
+                badge: "Beyond Restaurants",
+                titleLine1: "Elevate Your",
+                titleLine2: "Hotel Room Service",
+                description: "Guests can order perfectly crafted meals directly from their rooms without calling down. Instant dashboard notifications mean faster service and happier guests.",
+                steps: {
+                    scan: {
+                        title: "1. Scan In-Room QR",
+                        desc: "Unique QR codes placed in every room. Guests scan to instantly access your customized room service menu.",
+                        mockupRoom: "Room 402"
+                    },
+                    order: {
+                        title: "2. Browse & Order",
+                        desc: "Guests browse the rich visual menu and place orders directly from their personal devices comfortably.",
+                        mockupTitle: "In-Room Dining",
+                        mockupButton: "PLACE ORDER"
+                    },
+                    notify: {
+                        title: "3. Instant Notification",
+                        desc: "The restaurant dashboard instantly rings with a notification, precisely detailing the room number for quick delivery.",
+                        mockupNewOrder: "New Order!",
+                        mockupTime: "JUST NOW",
+                        mockupRoom: "ROOM 402"
+                    }
+                }
+            },
+            pricing: {
+                badge: "R+ restaurants offer",
+                titleLine1: "Choose Your",
+                titleLine2: "Path to Dominance",
+                monthly: {
+                    title: "Monthly Pro",
+                    price: "499 QAR",
+                    period: "/mo",
+                    was: "was 800 QAR",
+                    features: [
+                        "Real-time Dashboard",
+                        "Unlimited QR Scans",
+                        "Inventory & Stock",
+                        "Staff Management",
+                        "Standard Support"
+                    ],
+                    button: "Select Monthly"
+                },
+                trial: {
+                    popularBadge: "Most Popular Choice",
+                    title: "Founders Launch",
+                    price: "FREE",
+                    period: "For 10 Days",
+                    quote: "\"Experience the full power of Restau Plus Pro with absolutely zero risk.\"",
+                    features: [
+                        "Access to ALL Pro Features",
+                        "Priority Onboarding Setup",
+                        "No Credit Card Required",
+                        "Valid for First 10 Restaurants",
+                        "Cancel Anytime"
+                    ],
+                    button: "Start Free Trial",
+                    spotsRemaining: "Only 3 Spots Remaining"
+                },
+                yearly: {
+                    title: "Yearly Elite Pro",
+                    price: "4850 QAR",
+                    period: "/yr",
+                    bestValue: "~404 QAR/mo (Best Value)",
+                    features: [
+                        "Everything in Monthly",
+                        "Pro camera 4k video marketing",
+                        "Locked-in Discount Rate",
+                        "Dedicated Account Manager",
+                        "Advanced Analytics Suite",
+                        "Custom Branding Options",
+                        "Save 1138 QAR Yearly"
+                    ],
+                    button: "Go Elite Yearly"
+                },
+                badges: {
+                    secure: "Secure Payment",
+                    instant: "Instant Activation",
+                    cancel: "Cancel Anytime",
+                    support: "24/7 Priority Support"
+                }
+            },
+            hotelPricing: {
+                badge: "R+ Hotels Offer",
+                titleLine1: "Scale Your",
+                titleLine2: "Hospitality Experience",
+                monthly: {
+                    title: "Hotel Monthly",
+                    price: "1150 QAR",
+                    period: "/mo",
+                    features: [
+                        "Real-time Dashboard",
+                        "Unlimited Room QR Scans",
+                        "Inventory & Stock",
+                        "Staff Management",
+                        "Restau Plus support 16h/day 7/7"
+                    ],
+                    button: "Select Monthly"
+                },
+                sixMonths: {
+                    popularBadge: "Premium Hospitality",
+                    title: "Hotel 6 Months",
+                    price: "5500 QAR",
+                    period: "/6mo",
+                    was: "was 6,900 QAR",
+                    quote: "\"Perfect balance of premium features and flexibility for your hotel.\"",
+                    features: [
+                        "Everything in Hotel Monthly",
+                        "Priority Onboarding Setup",
+                        "Advanced Room Analytics",
+                        "Save 1,400 QAR"
+                    ],
+                    button: "Select 6 Months",
+                    availability: "Limited Availability"
+                },
+                yearly: {
+                    title: "Hotel Elite Yearly",
+                    price: "9700 QAR",
+                    period: "/yr",
+                    was: "was 13,800 QAR",
+                    bestValue: "~808 QAR/mo (Best Value)",
+                    features: [
+                        "Everything in Hotel Monthly",
+                        "Pro camera 4k video marketing",
+                        "Locked-in Discount Rate",
+                        "Dedicated Account Manager",
+                        "Advanced Room Analytics",
+                        "Custom Branding Options",
+                        "Save 4,100 QAR Yearly"
+                    ],
+                    button: "Go Hotel Elite Yearly"
+                }
+            },
+            footer: {
+                links: {
+                    pricing: "Pricing",
+                    about: "About",
+                    contact: "Contact"
+                },
+                rights: "Restau Plus. All rights reserved.",
+                privacy: "Privacy Policy",
+                terms: "Terms of Service"
+            },
+            about: {
+                founderRole: "Founder & CEO",
+                visionaryBadge: "Visionary Leadership",
+                titleLine1: "Built for Visionaries,",
+                titleLine2: "by a Visionary.",
+                desc1: "\"I founded Restau+ with a singular obsession: to eliminate the friction that holds restaurant owners back. The hospitality industry was stuck in the past, relying on fragmented tools that didn't talk to each other.\"",
+                desc2: "\"We didn't just want to build software; we wanted to build an engine for growth. Restau+ is the realization of that vision—a platform where technology disappears, and only performance remains.\"",
+                innovationBadge: "Rapid Innovation",
+                enterpriseBadge: "Enterprise Grade"
+            },
+            contact: {
+                badge: "We're here to help",
+                titleLine1: "Let's Talk",
+                titleLine2: "Business",
+                description: "Have a question about our pricing, features, or need a custom solution? Our team is ready to answer all your questions.",
+                instantSupport: {
+                    title: "Instant Support",
+                    desc: "Chat directly with our sales team on WhatsApp for the fastest response.",
+                    button: "Chat on WhatsApp",
+                    online: "Online Now (+974 5170 4550)"
+                },
+                otherWays: {
+                    title: "Other ways to reach us",
+                    emailSupport: "Email Support",
+                    hq: "Global HQ"
+                },
+                form: {
+                    title: "Send us a message",
+                    nameLabel: "Name",
+                    namePlaceholder: "John Doe",
+                    restaurantLabel: "Restaurant Name",
+                    restaurantPlaceholder: "Burger Co.",
+                    emailLabel: "Email",
+                    messageLabel: "Message",
+                    messagePlaceholder: "Tell us about your restaurant...",
+                    button: "Send Message"
+                }
+            }
         }
     },
     ar: {
@@ -477,6 +748,277 @@ export const translations = {
                 desc: "اطبع هذا لعملائك للمسح والطلب.",
                 print: "طباعة PDF",
                 view: "عرض الموقع الحي"
+            }
+        },
+        landing: {
+            navbar: {
+                pricing: "خطط الأسعار",
+                contact: "اتصل بنا",
+                login: "تسجيل الدخول",
+                signup: "إنشاء حساب"
+            },
+            dashboardDemo: {
+                badge: "المستقبل هنا",
+                titleLine1: "منصة التكنولوجيا المتكاملة",
+                titleLine2: "برنامج",
+                titleLineHighlight: "للمطاعم",
+                description: "استبدل 5 أدوات متفرقة بنظام تشغيل واحد قوي. مصمم للسرعة، مهيأ للتوسع.",
+                startTrial: "ابدأ تجربتك المجانية",
+                watchDemo: "شاهد العرض",
+                scaled: "مطعم تم توسيعه",
+                rating: "تقييم العملاء"
+            },
+            ecosystemStrip: {
+                pos: "نقاط البيع (POS)",
+                website: "موقع إلكتروني وتطبيق",
+                ordering: "الطلب عبر الإنترنت",
+                integrations: "تكاملات للنظام",
+                qr: "الطلب عبر QR",
+                reservations: "حجوزات الطاولات",
+                loyalty: "برنامج الولاء"
+            },
+            features: {
+                badge: "ليس مجرد قائمة",
+                titleLine1: "أكثر من مجرد",
+                titleLine2: "نظام بيئي رقمي",
+                descriptionLine1: "برنامج RESTAU PLUS يعيد بناء عملياتك بالكامل في تدفق واحد سلس.",
+                descriptionLine2: "من المسح الأول إلى تحليل الأرباح النهائي.",
+                items: {
+                    qr: {
+                        title: "الطلب الفوري عبر QR",
+                        desc: "امسح، اطلب، وادفع. بدون تطبيقات للتحميل. سرعة خالصة تسعد العملاء."
+                    },
+                    upsell: {
+                        title: "البيع المتقاطع الذكي",
+                        desc: "توصيات مدعومة بالذكاء الاصطناعي تزيد من متوسط فاتورتك بنسبة 20٪."
+                    },
+                    kds: {
+                        title: "شاشة المطبخ (KDS)",
+                        desc: "مزامنة الطلبات في الوقت الفعلي مباشرة إلى مطبخك. تخلص من الأخطاء."
+                    },
+                    analytics: {
+                        title: "تحليلات الأرباح المبكرة",
+                        desc: "شاهد إيراداتك تنمو في الوقت الفعلي. اتخذ قرارات بناءً على البيانات، وليس التخمينات."
+                    },
+                    staff: {
+                        title: "إدارة الموظفين",
+                        desc: "تتبع الأداء، قم بإدارة المناوبات، وحسِّن كفاءة فريقك."
+                    }
+                }
+            },
+            rplusMarketing: {
+                badge: "تسويق R+ للمطاعم",
+                titleLine1: "حوّل الزوار العابرين إلى",
+                titleLine2: "عملاء دائمين مدى الحياة",
+                description: "توقف عن التخمين وابدأ باليقين. نقوم بجمع بيانات عملائك بسلاسة ونمكنك من إعادة استهدافهم بعروض لا تُقاوم لضمان عودتهم.",
+                steps: {
+                    s1: {
+                        title: "١. جمع بيانات بسهولة",
+                        desc: "في كل مرة يتفاعل فيها عميل مع قائمتك الرقمية أو يضع طلبًا، يتم بناء ملفه الشخصي تلقائيًا في قاعدة بياناتك."
+                    },
+                    s2: {
+                        title: "٢. الاستهداف الدقيق",
+                        desc: "أطلق حملات رسائل قصيرة وبريد إلكتروني مستهدفة. أرسل خصومات VIP أو عروض 'افتقدناك' مباشرة إلى هواتفهم."
+                    },
+                    s3: {
+                        title: "٣. رفع معدلات التحويل",
+                        desc: "شاهد معدل عودتهم يتضاعف. اضمن ولاءهم وحوّلهم من زوار عرضيين إلى داعمين دائمين لعلامتك التجارية."
+                    }
+                },
+                dashboard: {
+                    title: "مدير الحملات التسويقية",
+                    activeFlow: "تدفق الاستهداف النشط",
+                    active: "نشط",
+                    sendingOffer: "جاري إرسال عرض 20٪...",
+                    offerRedeemed: "تم استخدام العرض",
+                    vipStatus: "تم فتح حالة VIP",
+                    newProfiles: "ملفات جديدة تم التقاطها",
+                    thisMonth: "هذا الشهر",
+                    returnRate: "زيادة معدل العودة",
+                    fromRetargeting: "من إعادة الاستهداف"
+                }
+            },
+            hotelRoomService: {
+                badge: "ما بعد المطاعم",
+                titleLine1: "ارتقِ بخدمة",
+                titleLine2: "غرف الفندق",
+                description: "يمكن للضيوف طلب وجبات مُعدة بامتياز مباشرة من غرفهم دون الحاجة للاتصال. إشعارات لوحة التحكم الفورية تعني خدمة أسرع وضيوفًا أكثر سعادة.",
+                steps: {
+                    scan: {
+                        title: "١. مسح QR في الغرفة",
+                        desc: "رموز QR فريدة موضوعة في كل غرفة. يقوم الضيوف بالمسح للوصول الفوري إلى قائمة خدمة الغرف المخصصة.",
+                        mockupRoom: "غرفة ٤٠٢"
+                    },
+                    order: {
+                        title: "٢. تصفح واطلب",
+                        desc: "يتصفح الضيوف القائمة المرئية الغنية ويقدمون طلباتهم مباشرة من أجهزتهم الشخصية بكل راحة.",
+                        mockupTitle: "تناول الطعام في الغرفة",
+                        mockupButton: "قدم الطلب"
+                    },
+                    notify: {
+                        title: "٣. إشعار فوري",
+                        desc: "ترن لوحة تحكم المطعم فورًا بإشعار، موضحة بدقة رقم الغرفة لتوصيل سريع.",
+                        mockupNewOrder: "طلب جديد!",
+                        mockupTime: "الآن",
+                        mockupRoom: "غرفة ٤٠٢"
+                    }
+                }
+            },
+            pricing: {
+                badge: "عرض مطاعم R+",
+                titleLine1: "اختر مسارك",
+                titleLine2: "نحو السيطرة",
+                monthly: {
+                    title: "الاشتراك الشهري الاحترافي",
+                    price: "٤٩٩ ريال قطري",
+                    period: "/شهرياً",
+                    was: "كان ٨٠٠ ريال قطري",
+                    features: [
+                        "لوحة تحكم في الوقت الفعلي",
+                        "مسح QR غير محدود",
+                        "المخزون والمستودع",
+                        "إدارة الموظفين",
+                        "دعم قياسي"
+                    ],
+                    button: "اختر الشهري"
+                },
+                trial: {
+                    popularBadge: "الخيار الأكثر شعبية",
+                    title: "إطلاق المؤسسين",
+                    price: "مجاناً",
+                    period: "لمدة ١٠ أيام",
+                    quote: "\"جرب القوة الكاملة لبرنامج RESTAU PLUS دون أي مخاطرة تقريبًا.\"",
+                    features: [
+                        "الوصول إلى جميع الميزات الاحترافية",
+                        "إعداد أولوية التهيئة",
+                        "لا يشترط بطاقة ائتمان",
+                        "صالح لأول ١٠ مطاعم",
+                        "إلغاء في أي وقت"
+                    ],
+                    button: "ابدأ التجربة المجانية",
+                    spotsRemaining: "باقي ٣ أماكن فقط"
+                },
+                yearly: {
+                    title: "السنوي النخبة الاحترافي",
+                    price: "٤٨٥٠ ريال قطري",
+                    period: "/سنوياً",
+                    bestValue: "~٤٠٤ ريال قطري/شهرياً (أفضل قيمة)",
+                    features: [
+                        "كل شيء في الشهري",
+                        "تسويق تصوير فيديو احترافي كاميرا 4k",
+                        "تثبيت معدل الخصم",
+                        "مدير حساب مخصص",
+                        "حزمة تحليلات متقدمة",
+                        "خيارات تخصيص العلامة التجارية",
+                        "توفير ١١٣٨ ريال قطري سنوياً"
+                    ],
+                    button: "احصل على السنوي"
+                },
+                badges: {
+                    secure: "دفع آمن",
+                    instant: "تفعيل فوري",
+                    cancel: "إلغاء في أي وقت",
+                    support: "دعم على مدار الساعة ٢٤/٧"
+                }
+            },
+            hotelPricing: {
+                badge: "عرض فنادق R+",
+                titleLine1: "ارتقِ",
+                titleLine2: "بتجربة الضيافة",
+                monthly: {
+                    title: "الاشتراك الشهري للفنادق",
+                    price: "١١٥٠ ريال قطري",
+                    period: "/شهرياً",
+                    features: [
+                        "لوحة تحكم في الوقت الفعلي",
+                        "مسح QR للغرف غير محدود",
+                        "المخزون والمستودع",
+                        "إدارة الموظفين",
+                        "دعم RESTAU PLUS ١٦ ساعة/يوم ٧/٧"
+                    ],
+                    button: "اختر الشهري"
+                },
+                sixMonths: {
+                    popularBadge: "ضيافة فاخرة",
+                    title: "اشتراك ٦ أشهر للفنادق",
+                    price: "٥٥٠٠ ريال قطري",
+                    period: "/٦أشهر",
+                    was: "كان ٦٩٠٠ ريال قطري",
+                    quote: "\"توازن مثالي بين الميزات المتميزة والمرونة لفندقك.\"",
+                    features: [
+                        "كل شيء في الخطة الشهرية للفنادق",
+                        "إعداد أولوية التهيئة",
+                        "تحليلات متقدمة للغرف",
+                        "توفير ١٤٠٠ ريال قطري"
+                    ],
+                    button: "اختر ٦ أشهر",
+                    availability: "التوفر محدود"
+                },
+                yearly: {
+                    title: "سنوي النخبة للفنادق",
+                    price: "٩٧٠٠ ريال قطري",
+                    period: "/سنوياً",
+                    was: "كان ١٣٨٠٠ ريال قطري",
+                    bestValue: "~٨٠٨ ريال قطري/شهرياً (أفضل قيمة)",
+                    features: [
+                        "كل شيء في الخطة الشهرية للفنادق",
+                        "تسويق تصوير فيديو احترافي كاميرا 4k",
+                        "تثبيت معدل الخصم",
+                        "مدير حساب مخصص",
+                        "تحليلات متقدمة للغرف",
+                        "خيارات تخصيص العلامة التجارية",
+                        "توفير ٤١٠٠ ريال قطري سنوياً"
+                    ],
+                    button: "احصل على السنوي"
+                }
+            },
+            footer: {
+                links: {
+                    pricing: "الأسعار",
+                    about: "من نحن",
+                    contact: "اتصل بنا"
+                },
+                rights: "Restau Plus. جميع الحقوق محفوظة.",
+                privacy: "سياسة الخصوصية",
+                terms: "شروط الخدمة"
+            },
+            about: {
+                founderRole: "المؤسس والمدير التنفيذي",
+                visionaryBadge: "قيادة ذات رؤية",
+                titleLine1: "مبني لأصحاب الرؤى،",
+                titleLine2: "بواسطة صاحب رؤية.",
+                desc1: "\"أسست Restau+ بشغف فريد: إزالة العقبات التي تعيق تقدم أصحاب المطاعم. كانت صناعة الضيافة عالقة في الماضي، وتعتمد على أدوات مجزأة لا تتواصل مع بعضها البعض.\"",
+                desc2: "\"لم نكن نريد مجرد بناء برنامج؛ أردنا بناء محرك للنمو. Restau+ هو تحقيق لتلك الرؤية - منصة حيث تختفي التكنولوجيا، ويبقى الأداء فقط.\"",
+                innovationBadge: "ابتكار سريع",
+                enterpriseBadge: "مستوى المؤسسات"
+            },
+            contact: {
+                badge: "نحن هنا للمساعدة",
+                titleLine1: "دعونا نتحدث",
+                titleLine2: "في الأعمال",
+                description: "هل لديك سؤال بخصوص أسعارنا أو ميزاتنا أو هل تحتاج إلى حل مخصص؟ فريقنا مستعد للإجابة على جميع أسئلتك.",
+                instantSupport: {
+                    title: "دعم فوري",
+                    desc: "تحدث مباشرة مع فريق المبيعات لدينا على واتساب للحصول على أسرع استجابة.",
+                    button: "تحدث على واتساب",
+                    online: "متاح الآن (+974 5170 4550)"
+                },
+                otherWays: {
+                    title: "طرق أخرى للتواصل معنا",
+                    emailSupport: "دعم عبر البريد الإلكتروني",
+                    hq: "المقر الرئيسي العالمي"
+                },
+                form: {
+                    title: "أرسل لنا رسالة",
+                    nameLabel: "الاسم",
+                    namePlaceholder: "محمد عبد الله",
+                    restaurantLabel: "اسم المطعم",
+                    restaurantPlaceholder: "برجر كو",
+                    emailLabel: "البريد الإلكتروني",
+                    messageLabel: "الرسالة",
+                    messagePlaceholder: "أخبرنا عن مطعمك...",
+                    button: "أرسل الرسالة"
+                }
             }
         }
     }

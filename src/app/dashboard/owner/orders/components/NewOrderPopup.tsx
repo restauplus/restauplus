@@ -65,9 +65,9 @@ export function NewOrderPopup({ order, onAccept, onClose }: NewOrderPopupProps) 
                                     {isTakeaway ? "TAKEAWAY" : tableDisplay}
                                 </span>
                             </h2>
-                            {order.customer_name && (
+                            {order.customer_phone && (
                                 <p className="text-lg text-zinc-400 font-medium">
-                                    {order.customer_name}
+                                    {order.customer_phone}
                                 </p>
                             )}
                         </motion.div>

@@ -106,6 +106,7 @@ export function RestaurantApp({
     const [loading, setLoading] = useState(false);
 
     const [customerName, setCustomerName] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
     const [tableNumber, setTableNumber] = useState("");
     const [orderNotes, setOrderNotes] = useState("");
 
@@ -120,7 +121,7 @@ export function RestaurantApp({
     const [isOrderPlaced, setIsOrderPlaced] = useState(false);
     const [lastOrderDetails, setLastOrderDetails] = useState<{
         cart: CartItem[];
-        customerName: string;
+        phoneNumber: string;
         tableNumber: string;
         total: number;
         orderNotes?: string;
@@ -304,13 +305,18 @@ export function RestaurantApp({
 
     const placeOrder = async () => {
         if (!currentRestaurant.is_taking_orders) { toast.error("Sorry, the restaurant is currently closed."); return; }
-        if (!customerName.trim()) { toast.error("👋 Tell us your name!"); return; }
+        // For takeaway, strongly suggest phone number or require it contextually, but here let's just make it optional or required if they want? 
+        // Previously name was required. Let's make phone optional for dine_in, but required for takeaway.
+        if (!phoneNumber.trim() && orderType === 'takeaway') { toast.error(language === 'ar' ? "يرجى إدخال رقم الهاتف" : "Please enter your phone number"); return; }
         setLoading(true);
         const total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
         try {
+            // If no notes, don't prepend empty string. 
+            const finalNotes = orderNotes;
+
             const { data: order, error } = await supabase.from('orders').insert({
                 restaurant_id: currentRestaurant.id, status: 'pending', total_amount: total,
-                customer_name: customerName, table_number: tableNumber, notes: orderNotes,
+                customer_phone: phoneNumber, table_number: tableNumber, notes: finalNotes,
                 order_type: orderType
             }).select().single();
             if (error) throw error;
@@ -332,12 +338,12 @@ export function RestaurantApp({
             }));
             setLastOrderDetails({
                 cart: [...cart],
-                customerName,
+                phoneNumber,
                 tableNumber,
                 orderNotes, // Add this
                 total
             });
-            setCart([]); setIsCartOpen(false); setCustomerName(""); setTableNumber(""); setOrderNotes("");
+            setCart([]); setIsCartOpen(false); setPhoneNumber(""); setTableNumber(""); setOrderNotes("");
             setIsOrderPlaced(true);
         } catch { toast.error("Error placing order."); } finally { setLoading(false); }
     };
@@ -418,7 +424,7 @@ export function RestaurantApp({
             basket: "Your Basket",
             ready: "Ready for checkout",
             deliveryName: "Delivery Name",
-            table: "Table/Pos",
+            table: "Table / Room",
             instructions: "Instructions",
             confirm: "Confirm Order",
             addToBasket: "Add to Basket",
@@ -1036,12 +1042,25 @@ export function RestaurantApp({
                                 </div>
 
                                 <div className="space-y-3">
-                                    <Input placeholder={t.deliveryName} value={customerName} onChange={e => setCustomerName(e.target.value)} className="h-16 rounded-[2rem] bg-zinc-50 border border-zinc-200 px-8 text-lg font-bold text-zinc-900 placeholder:text-zinc-500 shadow-sm focus-visible:ring-2 focus-visible:ring-primary/20" />
                                     <div className="grid grid-cols-1 gap-3">
                                         {orderType === 'dine_in' && (
                                             <Input placeholder={t.table} value={tableNumber} onChange={e => setTableNumber(e.target.value)} className="h-14 rounded-[1.5rem] bg-zinc-50 border border-zinc-200 px-6 font-semibold text-zinc-900 placeholder:text-zinc-500 shadow-sm focus-visible:ring-2 focus-visible:ring-primary/20" />
                                         )}
                                         <Input placeholder={t.instructions} value={orderNotes} onChange={e => setOrderNotes(e.target.value)} className="h-14 rounded-[1.5rem] bg-zinc-50 border border-zinc-200 px-6 font-semibold text-zinc-900 placeholder:text-zinc-500 shadow-sm focus-visible:ring-2 focus-visible:ring-primary/20" />
+
+                                        {/* Dynamic Phone Number Input - Mobile Optimized */}
+                                        <div className="relative group/phone">
+                                            <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-300 to-yellow-500 rounded-[1.5rem] blur opacity-30 group-hover/phone:opacity-60 transition duration-500"></div>
+                                            <Input
+                                                placeholder={language === 'ar' ? "أدخل رقمك لخصومات مستقبلية" : "Enter phone # for future discounts"}
+                                                value={phoneNumber}
+                                                onChange={e => setPhoneNumber(e.target.value)}
+                                                className="relative h-12 md:h-14 rounded-[1.5rem] bg-white border-2 border-amber-400 px-4 md:px-6 pr-10 md:pr-12 font-bold text-xs md:text-sm text-black placeholder:text-zinc-500 shadow-sm focus-visible:ring-4 focus-visible:ring-amber-400/20 focus-visible:border-amber-500 transition-all"
+                                            />
+                                            <div className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 text-amber-500 pointer-events-none animate-pulse">
+                                                <Sparkles className="w-4 h-4 md:w-5 md:h-5 fill-amber-500" />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <Button
@@ -1632,8 +1651,8 @@ export function RestaurantApp({
                                     {/* Info Grid */}
                                     <div className="grid grid-cols-2 gap-3 w-full mb-6">
                                         <div className="bg-zinc-50 p-4 rounded-2xl border border-zinc-100 flex flex-col items-center">
-                                            <span className="text-[10px] font-black text-zinc-300 uppercase tracking-widest mb-1">{language === 'ar' ? "الاسم" : "Name"}</span>
-                                            <span className="font-bold text-zinc-900 truncate max-w-full">{lastOrderDetails.customerName}</span>
+                                            <span className="text-[10px] font-black text-zinc-300 uppercase tracking-widest mb-1">{language === 'ar' ? "رقم الهاتف" : "Phone"}</span>
+                                            <span className="font-bold text-zinc-900 truncate max-w-full">{lastOrderDetails.phoneNumber || "-"}</span>
                                         </div>
                                         <div className="bg-zinc-50 p-4 rounded-2xl border border-zinc-100 flex flex-col items-center">
                                             <span className="text-[10px] font-black text-zinc-300 uppercase tracking-widest mb-1">{language === 'ar' ? "الطاولة" : "Table"}</span>

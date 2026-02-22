@@ -4,6 +4,7 @@ import "./globals.css";
 // import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import { cn } from "@/lib/utils";
 import { AuthProvider } from "@/context/auth-context";
+import { LanguageProvider } from "@/context/language-context";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,12 +23,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark no-scrollbar" suppressHydrationWarning>
       <body className={cn(inter.className, "antialiased bg-black")} suppressHydrationWarning>
-        <AuthProvider>
-          {/* <SmoothScroll> */}
-          {children}
-          <Toaster position="top-right" richColors theme="dark" />
-          {/* </SmoothScroll> */}
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            {/* <SmoothScroll> */}
+            {children}
+            <Toaster position="top-right" richColors theme="dark" />
+            {/* </SmoothScroll> */}
+          </AuthProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

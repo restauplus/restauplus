@@ -28,6 +28,11 @@ export default async function AdminDashboardPage() {
 
     const { data: adminProfile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
 
+    // Redirect sales to CRM exclusively
+    if (adminProfile?.role === 'sales') {
+        redirect("/dashboard/admin/crm");
+    }
+
     // Allow access if role is admin OR if it's one of the hardcoded super admins
     if (adminProfile?.role !== 'admin' && !SUPER_ADMINS.includes(user.email || '')) {
         redirect("/dashboard/owner");
@@ -35,13 +40,23 @@ export default async function AdminDashboardPage() {
 
     // 2. Data Fetching (Using RPC to bypass schema cache issues)
     const { data: profiles } = await supabase.rpc('get_all_profiles_with_restaurant');
+    const { data: profilePlans } = await supabase.from('profiles').select('id, plan_type');
+
+    // Merge plan_type into profiles
+    const mergedProfiles = profiles?.map((p: any) => {
+        const planData = profilePlans?.find((plan: any) => plan.id === p.id);
+        return {
+            ...p,
+            plan_type: planData?.plan_type || 'restaurant_trial'
+        };
+    }) || [];
 
     // 3. Stats Calculation
-    const totalUsers = profiles?.length || 0;
-    const activeUsers = profiles?.filter((p: any) => p.status === 'active' || p.status === 'approved').length || 0;
-    const pendingUsers = profiles?.filter((p: any) => p.status === 'pending').length || 0;
+    const totalUsers = mergedProfiles.length || 0;
+    const activeUsers = mergedProfiles.filter((p: any) => p.status === 'active' || p.status === 'approved').length || 0;
+    const pendingUsers = mergedProfiles.filter((p: any) => p.status === 'pending').length || 0;
     // Update logic for flattened RPC response: check if restaurant_id exists
-    const totalRestaurants = profiles?.filter((p: any) => p.restaurant_id).length || 0;
+    const totalRestaurants = mergedProfiles.filter((p: any) => p.restaurant_id).length || 0;
 
     return (
         <div className="min-h-screen bg-black text-white p-6 md:p-10 space-y-10 animate-in fade-in duration-500">
@@ -120,7 +135,7 @@ export default async function AdminDashboardPage() {
             </div>
 
             {/* Users List (Client Component with Search) */}
-            <AdminUserList initialProfiles={profiles || []} />
+            <AdminUserList initialProfiles={mergedProfiles} />
 
         </div>
     );

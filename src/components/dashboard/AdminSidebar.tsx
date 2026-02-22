@@ -10,7 +10,8 @@ import {
     Settings,
     ShieldAlert,
     CreditCard,
-    LogOut
+    LogOut,
+    LineChart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
@@ -18,9 +19,10 @@ import { useAuth } from "@/context/auth-context";
 interface SidebarProps {
     className?: string;
     mobile?: boolean;
+    userRole?: string;
 }
 
-export function AdminSidebar({ className, mobile }: SidebarProps) {
+export function AdminSidebar({ className, mobile, userRole = 'admin' }: SidebarProps) {
     const pathname = usePathname();
     const { signOut } = useAuth();
 
@@ -56,6 +58,12 @@ export function AdminSidebar({ className, mobile }: SidebarProps) {
             color: "text-emerald-500",
         },
         {
+            label: "Deals & Leads",
+            icon: LineChart,
+            href: "/dashboard/admin/crm",
+            color: "text-blue-400",
+        },
+        {
             label: "Global Settings",
             icon: Settings,
             href: "/dashboard/admin/settings",
@@ -67,6 +75,10 @@ export function AdminSidebar({ className, mobile }: SidebarProps) {
             color: "text-amber-500",
         },
     ];
+
+    const filteredRoutes = userRole === 'sales'
+        ? routes.filter(route => route.label === "Deals & Leads")
+        : routes;
 
     return (
         <div className={cn(
@@ -89,7 +101,7 @@ export function AdminSidebar({ className, mobile }: SidebarProps) {
             </div>
             <div className="px-3 py-2 flex-1">
                 <div className="space-y-1">
-                    {routes.map((route) => (
+                    {filteredRoutes.map((route) => (
                         <Link
                             key={route.href}
                             href={route.href}

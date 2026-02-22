@@ -1,147 +1,131 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { motion, useScroll, useTransform, useSpring, useMotionValue } from "framer-motion";
-import { Users, TrendingUp, Menu, ChefHat, ArrowRight, Play, Search, Plus, MessageSquare, Truck, Network, Settings, LogOut, Headphones, ExternalLink, LayoutDashboard, UtensilsCrossed, ClipboardList, GripVertical } from "lucide-react";
+import { motion } from "framer-motion";
+import { TrendingUp, ArrowRight, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { LaptopFrame } from "@/components/ui/laptop-frame";
-
-const menuItems = [
-    { id: 1, name: "Mac cheese bowl", price: "QR 34.00", image: "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=800&q=80", tag: "FRIED", category: "PLATES AND BOWLS" },
-    { id: 2, name: "Chicken dish with fries", price: "QR 28.00", image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=800&q=80", tag: "CRISPY", category: "PLATES AND BOWLS" },
-    { id: 3, name: "Spicy Sandwich", price: "QR 24.00", image: "https://images.unsplash.com/photo-1606758064437-12fb278385bf?auto=format&fit=crop&w=800&q=80", tag: "SPICY", category: "SANDWICHES AND ZINGERS" },
-    { id: 4, name: "Chicken Sandwich", price: "QR 27.00", image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=800&q=80", tag: null, category: "SANDWICHES AND ZINGERS" },
-    { id: 5, name: "Spicy Burger", price: "QR 25.00", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80", tag: "HOT", category: "BURGERS" },
-    { id: 6, name: "Mango Burger", price: "QR 30.00", image: "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=80", tag: "NEW", category: "BURGERS" },
-    { id: 7, name: "Tasty Burger", price: "QR 22.00", image: "https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?auto=format&fit=crop&w=800&q=80", tag: null, category: "BURGERS" },
-    { id: 8, name: "Classic Burger", price: "QR 18.00", image: "https://images.unsplash.com/photo-1551782450-a2132b4ba21d?auto=format&fit=crop&w=800&q=80", tag: null, category: "BURGERS" },
-];
+import { useLanguage } from "@/context/language-context";
 
 export function DashboardDemo() {
-    // 3D Mouse Follow Effect
-    const mouseX = useMotionValue(0);
-    const mouseY = useMotionValue(0);
-
-    const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [5, -5]), { damping: 15, stiffness: 100 });
-    const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-5, 5]), { damping: 15, stiffness: 100 });
-
-    function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
-        const { left, top, width, height } = currentTarget.getBoundingClientRect();
-        mouseX.set((clientX - left) / width - 0.5);
-        mouseY.set((clientY - top) / height - 0.5);
-    }
-
+    const { t } = useLanguage();
     return (
         <section
-            onMouseMove={handleMouseMove}
-            className="relative min-h-[110vh] flex flex-col justify-center pt-24 pb-20 overflow-hidden bg-[#050505] selection:bg-cyan-500/30 perspective-1500"
+            className="relative min-h-[90vh] flex flex-col justify-center pt-24 pb-20 overflow-hidden bg-black selection:bg-cyan-500/30"
         >
-            {/* Background Glows */}
-            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-cyan-500/5 rounded-full blur-[150px] pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[150px] pointer-events-none" />
+            {/* Optimized Background Glows - Reduced Blur & Opacity */}
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-[80px] pointer-events-none opacity-50" />
+            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[80px] pointer-events-none opacity-50" />
 
             <div className="container mx-auto px-4 lg:px-8 z-10">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
-                    {/* LEFT COLUMN: THE LAPTOP (Dynamic Menu Management) */}
+                    {/* LEFT COLUMN: LAPTOP (Simple Fade In) */}
                     <motion.div
-                        style={{ perspective: 2000, rotateX, rotateY }}
-                        initial={{ opacity: 0, scale: 0.9, rotateX: 20 }}
-                        animate={{ opacity: 1, scale: 1, rotateX: 0 }}
-                        transition={{ duration: 1.2, ease: "easeOut" }}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
                         className="order-2 lg:order-1 relative z-20"
                     >
-                        <motion.div
-                            animate={{ y: [-10, 10, -10] }}
-                            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                            className="transform hover:scale-[1.02] transition-transform duration-500"
-                        >
-                            <LaptopFrame>
-                                <img
-                                    src="/dashboard-screen-8.png"
-                                    alt="RestauPro Dashboard"
-                                    className="w-full h-full object-fill"
-                                />
-                            </LaptopFrame>
-                        </motion.div>
+                        <LaptopFrame>
+                            <img
+                                src="/dashboard-screen-8.png"
+                                alt="RestauPro Dashboard"
+                                className="w-full h-full object-fill"
+                                loading="eager"
+                            />
+                        </LaptopFrame>
                     </motion.div>
 
-                    {/* RIGHT COLUMN: TEXT CONTENT */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-                        className="text-left space-y-8 order-1 lg:order-2 px-4 lg:px-0"
-                    >
+                    {/* RIGHT COLUMN: TEXT CONTENT (Simple Stagger) */}
+                    <div className="text-left space-y-8 order-1 lg:order-2 px-4 lg:px-0">
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
+                            transition={{ duration: 0.5 }}
                             className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-bold tracking-widest uppercase"
                         >
-                            The Future is Here
+                            {t('landing.dashboardDemo.badge')}
                         </motion.div>
 
-                        <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-[1.1]">
-                            Control Your<br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">Empire</span> With<br />
-                            One Touch.
-                        </h1>
+                        <motion.h1
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.1 }}
+                            className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-[1.1]"
+                        >
+                            {t('landing.dashboardDemo.titleLine1')}<br />
+                            {t('landing.dashboardDemo.titleLine2')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">{t('landing.dashboardDemo.titleLineHighlight')}</span>
+                        </motion.h1>
 
-                        <p className="text-xl text-zinc-400 max-w-lg font-medium leading-relaxed">
-                            Replace 5 fragmented tools with one powerful operating system. Built for speed, designed for scale.
-                        </p>
+                        <motion.p
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            className="text-xl text-zinc-400 max-w-lg font-medium leading-relaxed"
+                        >
+                            {t('landing.dashboardDemo.description')}
+                        </motion.p>
 
-                        <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.3 }}
+                            className="flex flex-col sm:flex-row gap-4 pt-4"
+                        >
                             <Link href="/register?plan=trial">
-                                <Button className="h-14 md:h-16 px-8 md:px-10 text-lg rounded-full bg-cyan-400 text-black hover:bg-cyan-300 font-bold shadow-[0_0_40px_rgba(34,211,238,0.3)] hover:shadow-[0_0_60px_rgba(34,211,238,0.5)] transition-all">
-                                    Start Free Trial
-                                    <ArrowRight className="w-5 h-5 ml-2" />
+                                <Button className="h-14 md:h-16 px-8 md:px-10 text-lg rounded-full bg-cyan-400 text-black hover:bg-cyan-300 font-bold shadow-[0_0_40px_rgba(34,211,238,0.2)] hover:shadow-[0_0_60px_rgba(34,211,238,0.4)] transition-all">
+                                    {t('landing.dashboardDemo.startTrial')}
+                                    <ArrowRight className="w-5 h-5 ml-2 rtl:rotate-180" />
                                 </Button>
                             </Link>
                             <Link href="/restaurant/fried">
                                 <Button variant="outline" className="h-14 md:h-16 px-8 md:px-10 text-lg rounded-full border-white/10 hover:bg-white/10 text-white font-medium hover:border-white/20">
-                                    <Play className="w-5 h-5 mr-3 fill-white" />
-                                    Watch Demo
+                                    <Play className="w-5 h-5 mr-3 rtl:mr-0 rtl:ml-3 fill-white rtl:rotate-180" />
+                                    {t('landing.dashboardDemo.watchDemo')}
                                 </Button>
                             </Link>
-                        </div>
+                        </motion.div>
 
-                        <div className="flex items-center gap-6 pt-8 border-t border-white/5">
-                            <div>
-                                <h4 className="text-3xl font-black text-white">500+</h4>
-                                <p className="text-sm text-zinc-500">Restaurants Scaled</p>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.5, delay: 0.4 }}
+                            className="flex items-center gap-8 pt-8 border-t border-white/5"
+                        >
+                            <div className="group">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <h4 className="text-4xl font-black text-white tracking-tight group-hover:text-cyan-300 transition-colors duration-300">
+                                        +56
+                                    </h4>
+                                    <TrendingUp className="w-6 h-6 text-cyan-500" />
+                                </div>
+                                <p className="text-sm font-bold text-zinc-500 uppercase tracking-widest group-hover:text-zinc-300 transition-colors">{t('landing.dashboardDemo.scaled')}</p>
                             </div>
-                            <div className="w-px h-12 bg-white/10" />
-                            <div>
-                                <h4 className="text-3xl font-black text-white">$120M</h4>
-                                <p className="text-sm text-zinc-500">Processed Yearly</p>
+
+                            <div className="w-px h-16 bg-white/10" />
+
+                            <div className="group">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <h4 className="text-4xl font-black text-white tracking-tight group-hover:text-amber-400 transition-colors duration-300">
+                                        5.0
+                                    </h4>
+                                    <div className="flex gap-0.5">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <svg key={star} className="w-5 h-5 text-yellow-500 fill-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                            </svg>
+                                        ))}
+                                    </div>
+                                </div>
+                                <p className="text-sm font-bold text-zinc-500 uppercase tracking-widest group-hover:text-zinc-300 transition-colors">{t('landing.dashboardDemo.rating')}</p>
                             </div>
-                        </div>
-                    </motion.div>
+                        </motion.div>
+                    </div>
 
                 </div>
             </div>
         </section>
-    );
-}
-
-function MenuItem({ icon: Icon, label, active, badge, badgeColor = "bg-purple-500 text-white" }: any) {
-    return (
-        <div className={cn(
-            "flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all group relative",
-            active ? "bg-white/[0.03] text-white" : "text-zinc-400 hover:text-white hover:bg-white/5"
-        )}>
-            {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-cyan-400 rounded-r-full" />}
-            <Icon className={cn("w-4 h-4 shrink-0", active && "text-cyan-400")} />
-            <span className={cn("hidden md:block truncate text-[11px] font-medium", active && "text-cyan-400 font-bold")}>{label}</span>
-            {badge && (
-                <span className={cn("hidden md:block ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded", badgeColor)}>
-                    {badge}
-                </span>
-            )}
-        </div>
     );
 }

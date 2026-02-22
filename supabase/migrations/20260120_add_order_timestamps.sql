@@ -1,7 +1,0 @@
-
--- Add timestamp columns for detailed order tracking
-ALTER TABLE orders 
-ADD COLUMN IF NOT EXISTS preparing_at TIMESTAMPTZ,
-ADD COLUMN IF NOT EXISTS ready_at TIMESTAMPTZ,
-ADD COLUMN IF NOT EXISTS served_at TIMESTAMPTZ,
-ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ;

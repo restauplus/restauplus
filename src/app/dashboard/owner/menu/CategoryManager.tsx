@@ -94,6 +94,7 @@ export function CategoryManager({ categories, isOpen, onClose, onUpdate, restaur
     const [newItemName, setNewItemName] = useState("");
     const supabase = createClient();
     const { t } = useLanguage();
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     // Sync only when opening or when props change explicitly
     useEffect(() => {

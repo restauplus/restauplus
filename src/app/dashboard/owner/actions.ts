@@ -21,18 +21,35 @@ export async function getDashboardStats() {
         throw new Error("No restaurant found");
     }
 
-    // Check permission logic strictly if needed, but for now assuming profile check passes sufficient context 
-    // (Actual page checks status/role, we can duplicate minimal checks here or assume UI handles redirection if fetch fails)
-
     const restaurantId = profile.restaurant_id;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    // Parallel Data Fetching
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const startOfYear = new Date(new Date().getFullYear(), 0, 1);
+
+    // Parallel Data Fetching - EVERYTHING at once
     const [
         { count: activeOrdersCount },
         { data: pendingOrders },
         { count: totalOrdersToday },
-        { count: totalOrdersAllTime }
+        { count: totalOrdersAllTime },
+        { data: todayRevenueOrders },
+        { data: allTimeRevenueOrders },
+        { data: weeklyOrders },
+        { data: topSellingData },
+        { data: monthlyOrders },
+        { data: yearlyOrders },
+        { data: recentOrders },
+        { data: restaurant }
     ] = await Promise.all([
+        // 1. Active Orders Count
         supabase
             .from('orders')
             .select('*', { count: 'exact', head: true })
@@ -41,69 +58,102 @@ export async function getDashboardStats() {
             .neq('status', 'cancelled')
             .neq('status', 'paid'),
 
+        // 2. Pending Orders (for Pending Income)
         supabase
             .from('orders')
             .select('total_amount, status')
             .eq('restaurant_id', restaurantId)
             .in('status', ['pending', 'preparing', 'ready', 'served']),
 
+        // 3. Total Orders Today
         supabase
             .from('orders')
             .select('*', { count: 'exact', head: true })
             .eq('restaurant_id', restaurantId)
-            .gte('created_at', new Date().toISOString().split('T')[0]), // Today
+            .gte('created_at', today.toISOString())
+            .neq('status', 'cancelled'),
 
+        // 4. Total Orders All Time
         supabase
             .from('orders')
             .select('*', { count: 'exact', head: true })
-            .eq('restaurant_id', restaurantId) // All time count
+            .eq('restaurant_id', restaurantId)
+            .neq('status', 'cancelled'),
+
+        // 5. Daily Revenue Orders
+        supabase
+            .from('orders')
+            .select('total_amount')
+            .eq('restaurant_id', restaurantId)
+            .eq('status', 'paid')
+            .gte('created_at', today.toISOString()),
+
+        // 6. Total Revenue (All Time)
+        supabase
+            .from('orders')
+            .select('total_amount')
+            .eq('restaurant_id', restaurantId)
+            .eq('status', 'paid'),
+
+        // 7. Weekly Orders (Chart)
+        supabase
+            .from('orders')
+            .select('total_amount, created_at')
+            .eq('restaurant_id', restaurantId)
+            .eq('status', 'paid')
+            .gte('created_at', sevenDaysAgo.toISOString()),
+
+        // 8. Top Selling Items
+        supabase
+            .from('order_items')
+            .select('quantity, menu_items(name, price)')
+            .eq('restaurant_id', restaurantId),
+
+        // 9. Monthly Orders
+        supabase
+            .from('orders')
+            .select('total_amount, created_at')
+            .eq('restaurant_id', restaurantId)
+            .eq('status', 'paid')
+            .gte('created_at', startOfMonth.toISOString()),
+
+        // 10. Yearly Orders
+        supabase
+            .from('orders')
+            .select('total_amount, created_at')
+            .eq('restaurant_id', restaurantId)
+            .eq('status', 'paid')
+            .gte('created_at', startOfYear.toISOString()),
+
+        // 11. Recent Activity
+        supabase
+            .from('orders')
+            .select('customer_phone, table_number, created_at, status')
+            .eq('restaurant_id', restaurantId)
+            .order('created_at', { ascending: false })
+            .limit(5),
+
+        // 12. Restaurant Details (Currency)
+        supabase
+            .from('restaurants')
+            .select('currency')
+            .eq('id', restaurantId)
+            .single()
     ]);
 
+    // Processing Data (Synchronous & Fast)
     const pendingIncomeValue = pendingOrders?.reduce((acc, order) => acc + (Number(order.total_amount) || 0), 0) || 0;
-
-    // Calculate Daily Revenue (Today)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const { data: todayRevenueOrders } = await supabase
-        .from('orders')
-        .select('total_amount')
-        .eq('restaurant_id', restaurantId)
-        .eq('status', 'paid')
-        .gte('created_at', today.toISOString());
-
     const dailyRevenue = todayRevenueOrders?.reduce((acc, order) => acc + (Number(order.total_amount) || 0), 0) || 0;
-
-    // Calculate Total Revenue (All Time)
-    const { data: allTimeRevenueOrders } = await supabase
-        .from('orders')
-        .select('total_amount')
-        .eq('restaurant_id', restaurantId)
-        .eq('status', 'paid');
-
     const totalRevenue = allTimeRevenueOrders?.reduce((acc, order) => acc + (Number(order.total_amount) || 0), 0) || 0;
 
-    // Fetch Weekly Orders for Revenue Chart
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-    const { data: weeklyOrders } = await supabase
-        .from('orders')
-        .select('total_amount, created_at')
-        .eq('restaurant_id', restaurantId)
-        .eq('status', 'paid')
-        .gte('created_at', sevenDaysAgo.toISOString());
-
-    // Group Revenue by Day
+    // Weekly Chart Data Processing
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const chartDataMap = new Map();
-
     for (let i = 6; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        const dayName = days[date.getDay()];
-        chartDataMap.set(dayName, { total: 0, count: 0 });
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        chartDataMap.set(days[d.getDay()], { total: 0, count: 0 });
     }
-
     weeklyOrders?.forEach(order => {
         const dayName = days[new Date(order.created_at).getDay()];
         if (chartDataMap.has(dayName)) {
@@ -114,31 +164,21 @@ export async function getDashboardStats() {
             });
         }
     });
-
     const chartData = Array.from(chartDataMap).map(([name, data]) => ({
         name,
         total: data.total,
         count: data.count
     }));
 
-    // Calculate Top Selling Items
-    const { data: topSellingData } = await supabase
-        .from('order_items')
-        .select('quantity, menu_items(name, price)')
-        .eq('restaurant_id', restaurantId);
-
+    // Top Selling Processing
     const itemCounts: Record<string, { count: number, price: number }> = {};
     (topSellingData as any[])?.forEach(item => {
         const menuItem = Array.isArray(item.menu_items) ? item.menu_items[0] : item.menu_items;
         const name = menuItem?.name || 'Unknown';
         const price = Number(menuItem?.price) || 0;
-
-        if (!itemCounts[name]) {
-            itemCounts[name] = { count: 0, price };
-        }
+        if (!itemCounts[name]) itemCounts[name] = { count: 0, price };
         itemCounts[name].count += item.quantity;
     });
-
     const topSelling = Object.entries(itemCounts)
         .map(([name, data]) => ({
             name,
@@ -148,81 +188,35 @@ export async function getDashboardStats() {
         .sort((a, b) => b.count - a.count)
         .slice(0, 3);
 
-    // Calculate Weekly Total Growth
     const weeklyTotalRevenue = chartData.reduce((acc, day) => acc + day.total, 0);
 
-    // --- NEW: Monthly Data (Current Month) ---
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
-
-    const { data: monthlyOrders } = await supabase
-        .from('orders')
-        .select('total_amount, created_at')
-        .eq('restaurant_id', restaurantId)
-        .eq('status', 'paid')
-        .gte('created_at', startOfMonth.toISOString());
-
+    // Monthly Chart Data Processing
     const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
     const monthlyChartData = Array.from({ length: daysInMonth }, (_, i) => {
         const day = i + 1;
         return { name: day.toString(), total: 0, date: new Date(today.getFullYear(), today.getMonth(), day).toISOString() };
     });
-
     monthlyOrders?.forEach(order => {
-        const date = new Date(order.created_at);
-        const day = date.getDate();
-        if (monthlyChartData[day - 1]) {
-            monthlyChartData[day - 1].total += (Number(order.total_amount) || 0);
-        }
+        const day = new Date(order.created_at).getDate();
+        if (monthlyChartData[day - 1]) monthlyChartData[day - 1].total += (Number(order.total_amount) || 0);
     });
-
     const monthlyTotalRevenue = monthlyOrders?.reduce((acc, order) => acc + (Number(order.total_amount) || 0), 0) || 0;
 
-
-    // --- NEW: Yearly Data (Current Year) ---
-    const startOfYear = new Date(new Date().getFullYear(), 0, 1);
-
-    const { data: yearlyOrders } = await supabase
-        .from('orders')
-        .select('total_amount, created_at')
-        .eq('restaurant_id', restaurantId)
-        .eq('status', 'paid')
-        .gte('created_at', startOfYear.toISOString());
-
+    // Yearly Chart Data Processing
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const yearlyChartData = monthNames.map(name => ({ name, total: 0 }));
-
     yearlyOrders?.forEach(order => {
         const monthIndex = new Date(order.created_at).getMonth();
-        if (yearlyChartData[monthIndex]) {
-            yearlyChartData[monthIndex].total += (Number(order.total_amount) || 0);
-        }
+        if (yearlyChartData[monthIndex]) yearlyChartData[monthIndex].total += (Number(order.total_amount) || 0);
     });
-
     const yearlyTotalRevenue = yearlyOrders?.reduce((acc, order) => acc + (Number(order.total_amount) || 0), 0) || 0;
 
-    // --- PROFIT CALENDAR DATA (Re-using monthly data) ---
+    // Calendar Data
     const calendarData = monthlyChartData.map(day => ({
         date: day.date,
         profit: day.total,
         count: monthlyOrders?.filter(o => new Date(o.created_at).getDate() === parseInt(day.name)).length || 0
     }));
-
-    // Fetch Recent Activity
-    const { data: recentOrders } = await supabase
-        .from('orders')
-        .select('customer_name, table_number, created_at, status')
-        .eq('restaurant_id', restaurantId)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-    // Fetch Restaurant Details (Currency)
-    const { data: restaurant } = await supabase
-        .from('restaurants')
-        .select('currency')
-        .eq('id', restaurantId)
-        .single();
 
     const currencyCode = restaurant?.currency || 'USD';
     const currencySymbol = currencyCode === 'QAR' ? 'QR' : currencyCode === 'MAD' ? 'DH' : '$';
@@ -235,17 +229,17 @@ export async function getDashboardStats() {
         monthlyTotalRevenue,
         yearlyTotalRevenue,
         activeOrders: activeOrdersCount || 0,
-        activeTables: 0,
+        activeTables: 0, // Placeholder as per original
         pendingIncome: pendingIncomeValue,
         totalOrdersToday: totalOrdersToday || 0,
         totalOrdersAllTime: totalOrdersAllTime || 0,
-        chartData, // Weekly
+        chartData,
         monthlyChartData,
         yearlyChartData,
         calendarData,
         topSelling,
         recentActivity: recentOrders?.map(order => ({
-            title: `New order from ${order.customer_name || 'Guest'}`,
+            title: `New order from ${order.customer_phone || 'Guest'}`,
             subtitle: `Table ${order.table_number || 'Express'} • ${order.status}`,
             time: new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         })) || []

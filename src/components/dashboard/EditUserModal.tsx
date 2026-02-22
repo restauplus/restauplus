@@ -30,12 +30,18 @@ export function EditUserModal({ user, open, onOpenChange }: EditUserModalProps) 
     const handleSave = async () => {
         setLoading(true);
         try {
-            await updateUserProfile(user.id, formData);
-            toast.success("Profile updated successfully");
-            onOpenChange(false);
-            router.refresh();
-        } catch (error) {
-            toast.error("Failed to update profile");
+            const result = await updateUserProfile(user.id, formData);
+            if (!result || !result.success) {
+                console.error("Update failed:", result?.error);
+                toast.error(result?.error || "Failed to update profile");
+            } else {
+                toast.success("Profile updated successfully");
+                onOpenChange(false);
+                router.refresh();
+            }
+        } catch (error: any) {
+            console.error("Client error:", error);
+            toast.error(error.message || "Failed to update profile");
         } finally {
             setLoading(false);
         }
@@ -107,6 +113,7 @@ export function EditUserModal({ user, open, onOpenChange }: EditUserModalProps) 
                             <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
                                 <SelectItem value="user">User</SelectItem>
                                 <SelectItem value="admin">Admin</SelectItem>
+                                <SelectItem value="sales">Sales Team</SelectItem>
                                 <SelectItem value="owner">Owner</SelectItem>
                             </SelectContent>
                         </Select>

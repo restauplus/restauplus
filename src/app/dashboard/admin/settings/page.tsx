@@ -46,7 +46,7 @@ export default async function AdminSettingsPage() {
                         </div>
                         <div className="space-y-2">
                             <Label>Support Email</Label>
-                            <Input defaultValue="support@restauplus.com" className="bg-black/50 border-white/10" />
+                            <Input defaultValue="contact@restau.plus" className="bg-black/50 border-white/10" />
                         </div>
                         <Button className="w-full mt-4 bg-white/10 hover:bg-white/20">Save Changes</Button>
                     </CardContent>

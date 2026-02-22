@@ -133,30 +133,35 @@ export async function deleteUser(userId: string) {
 export async function updateUserProfile(userId: string, data: { full_name: string; email: string; password: string; role: string }) {
     const supabase = await createClient();
 
-    // Verify Admin
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("Unauthorized");
+    try {
+        // Verify Admin
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return { success: false, error: "Unauthorized: No user found" };
 
-    const { data: adminProfile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-    const isMasterAdmin = user.email === 'admin@restauplus.com' || user.email === 'admin212123@restauplus.com';
-    if (adminProfile?.role !== 'admin' && !isMasterAdmin) {
-        throw new Error("Unauthorized: Admin only");
+        const { data: adminProfile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+        const isMasterAdmin = user.email === 'admin@restauplus.com' || user.email === 'admin212123@restauplus.com' || user.email === 'bensalahbader.business@gmail.com';
+        if (adminProfile?.role !== 'admin' && !isMasterAdmin) {
+            return { success: false, error: "Unauthorized: You do not have Admin privileges" };
+        }
+
+        // Use RPC to update both profile and auth.users
+        const { error } = await supabase.rpc('admin_update_user_secret', {
+            target_user_id: userId,
+            new_full_name: data.full_name,
+            new_email: data.email,
+            new_password: data.password,
+            new_role: data.role
+        });
+
+        if (error) {
+            console.error("RPC Error:", error);
+            return { success: false, error: "Database Error: " + (error.message || "Failed to call RPC") };
+        }
+
+        revalidatePath('/dashboard/admin');
+        return { success: true };
+    } catch (e: any) {
+        console.error("Catch Error:", e);
+        return { success: false, error: "Server Error: " + (e.message || String(e)) };
     }
-
-    // Use RPC to update both profile and auth.users
-    const { error } = await supabase.rpc('admin_update_user_secret', {
-        target_user_id: userId,
-        new_full_name: data.full_name,
-        new_email: data.email,
-        new_password: data.password,
-        new_role: data.role
-    });
-
-    if (error) {
-        console.error("RPC Error:", error);
-        throw new Error(error.message || "Failed to update user");
-    }
-
-    revalidatePath('/dashboard/admin');
-    return { success: true };
 }

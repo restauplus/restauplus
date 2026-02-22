@@ -42,8 +42,8 @@ export function AdvancedChart({ weeklyData, monthlyData, yearlyData, growth, cur
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
 
             <CardHeader>
-                <CardTitle className="flex items-center justify-between relative z-10">
-                    <div className="flex flex-col gap-1">
+                <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between relative z-10 gap-4">
+                    <div className="flex flex-col gap-1 w-full sm:w-auto">
                         <AnimatePresence mode="wait">
                             <motion.span
                                 key={period}
@@ -57,7 +57,7 @@ export function AdvancedChart({ weeklyData, monthlyData, yearlyData, growth, cur
                         </AnimatePresence>
                         <span className="text-sm font-medium text-zinc-400">{t('charts.totalGrowth')} ({periodLabels[period]})</span>
                     </div>
-                    <div className="flex gap-1 bg-zinc-800/50 p-1 rounded-lg backdrop-blur-sm border border-zinc-700/50">
+                    <div className="flex gap-1 bg-zinc-800/50 p-1 rounded-lg backdrop-blur-sm border border-zinc-700/50 w-full sm:w-auto overflow-x-auto no-scrollbar">
                         {(["week", "month", "year"] as Period[]).map((p) => (
                             <Button
                                 key={p}
@@ -77,7 +77,7 @@ export function AdvancedChart({ weeklyData, monthlyData, yearlyData, growth, cur
                     </div>
                 </CardTitle>
             </CardHeader>
-            <CardContent className="h-[80%] pt-4 relative z-10">
+            <CardContent className="h-[calc(100%-80px)] sm:h-[80%] pt-4 relative z-10">
                 <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                         <defs>

@@ -35,7 +35,7 @@ export function TrustedBy() {
         <div className="relative flex flex-col items-center justify-center gap-10 py-12 md:py-24 bg-black overflow-hidden z-20">
 
             {/* Logos Marquee */}
-            <div className="flex w-full overflow-hidden mask-linear-fade">
+            <div className="flex w-full overflow-hidden mask-linear-fade" dir="ltr">
                 <motion.div
                     initial={{ x: 0 }}
                     animate={{ x: "-50%" }}

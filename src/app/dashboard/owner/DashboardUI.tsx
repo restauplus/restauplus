@@ -268,9 +268,9 @@ export function DashboardUI({ stats: initialStats }: { stats: DashboardStats }) 
             </div>
 
             {/* ANALYTICS SECTION - ULTRA PRO */}
-            <div className="grid gap-6 md:grid-cols-7 h-[500px]">
+            <div className="flex flex-col lg:grid lg:grid-cols-7 gap-6 min-h-[500px] lg:h-[500px]">
                 {/* Advanced Interactive Chart */}
-                <motion.div variants={item} className="col-span-7 lg:col-span-5 h-full">
+                <motion.div variants={item} className="lg:col-span-5 h-[350px] sm:h-[450px] lg:h-full w-full">
                     <AdvancedChart
                         weeklyData={stats.chartData}
                         monthlyData={stats.monthlyChartData}
@@ -285,7 +285,7 @@ export function DashboardUI({ stats: initialStats }: { stats: DashboardStats }) 
                 </motion.div>
 
                 {/* Profit Calendar */}
-                <motion.div variants={item} className="col-span-7 lg:col-span-2 h-full">
+                <motion.div variants={item} className="lg:col-span-2 w-full">
                     <ProfitCalendar
                         data={stats.calendarData}
                         currency={stats.currency}

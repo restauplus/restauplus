@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import { ChefHat } from "lucide-react";
+import { useLanguage } from "@/context/language-context";
 
 export function Footer() {
+    const { t } = useLanguage();
     return (
         <footer className="bg-black relative overflow-hidden">
             <div className="border-t border-white/10 pt-24 pb-12">
@@ -17,13 +21,17 @@ export function Footer() {
                             </div>
 
                             <nav className="flex flex-wrap justify-center gap-8 md:gap-12">
-                                {['Features', 'Pricing', 'About', 'Contact', 'Blog'].map((item) => (
+                                {[
+                                    { name: t('landing.footer.links.pricing'), href: '#pricing' },
+                                    { name: t('landing.footer.links.about'), href: '/about' },
+                                    { name: t('landing.footer.links.contact'), href: '/contact' }
+                                ].map((item) => (
                                     <Link
-                                        key={item}
-                                        href="#"
+                                        key={item.name}
+                                        href={item.href}
                                         className="text-neutral-400 hover:text-white text-lg font-medium transition-colors"
                                     >
-                                        {item}
+                                        {item.name}
                                     </Link>
                                 ))}
                             </nav>
@@ -32,14 +40,14 @@ export function Footer() {
 
                     <div className="flex flex-col md:flex-row justify-between items-center gap-6 pt-8 border-t border-white/5 relative z-10">
                         <p className="text-sm text-neutral-500">
-                            &copy; {new Date().getFullYear()} Restau Plus. All rights reserved.
+                            &copy; {new Date().getFullYear()} {t('landing.footer.rights')}
                         </p>
                         <div className="flex gap-6">
                             <Link href="#" className="text-sm text-neutral-500 hover:text-white transition-colors">
-                                Privacy Policy
+                                {t('landing.footer.privacy')}
                             </Link>
                             <Link href="#" className="text-sm text-neutral-500 hover:text-white transition-colors">
-                                Terms of Service
+                                {t('landing.footer.terms')}
                             </Link>
                         </div>
                     </div>

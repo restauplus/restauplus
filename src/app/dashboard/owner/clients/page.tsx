@@ -2,12 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { ArrowUpRight, Search, Filter, Download, User, ShoppingBag, Banknote, RefreshCcw, Clock } from "lucide-react";
+import { ArrowUpRight, Search, Filter, Download, User, ShoppingBag, Banknote, RefreshCcw, Clock, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export default function ClientsPage() {
     const [clients, setClients] = useState<any[]>([]);
+    const [allOrders, setAllOrders] = useState<any[]>([]);
+    const [selectedClientPhone, setSelectedClientPhone] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [currency, setCurrency] = useState("DH"); // Default fallback
@@ -37,7 +43,15 @@ export default function ClientsPage() {
 
         const { data: orders, error } = await supabase
             .from('orders')
-            .select('*')
+            .select(`
+                *,
+                order_items (
+                    quantity,
+                    notes,
+                    price_at_time,
+                    menu_items ( name, price )
+                )
+            `)
             .eq('restaurant_id', profile.restaurant_id)
             .order('created_at', { ascending: false });
 
@@ -47,19 +61,24 @@ export default function ClientsPage() {
             return;
         }
 
-        // Aggregate by Customer Name (since we don't have a customers table yet)
+        // Aggregate by Customer Phone
         const clientMap = new Map();
 
         orders?.forEach(order => {
-            const name = order.customer_name || "Unknown Guest";
-            // Normalizing name key
-            const key = name.toLowerCase().trim();
+            const phone = order.customer_phone;
+
+            // Only include orders that have a valid phone number
+            if (!phone || phone.trim() === "" || phone === "Unknown Guest") {
+                return;
+            }
+
+            // Normalizing phone key
+            const key = phone.toLowerCase().trim();
 
             if (!clientMap.has(key)) {
                 clientMap.set(key, {
                     id: key, // temporary ID
-                    name: name,
-                    phone: order.customer_phone || "N/A",
+                    phone: phone,
                     totalOrders: 0,
                     totalSpent: 0,
                     lastVisit: order.created_at,
@@ -98,12 +117,29 @@ export default function ClientsPage() {
             }
         });
 
-        // Use Math.ceil so if average is 0.5 mins it shows 1 min
         const avgPrep = servedOrdersCount > 0 ? Math.ceil(totalDurationMinutes / servedOrdersCount) : 0;
         setAvgPrepTime(avgPrep);
 
+        setAllOrders(orders || []);
         setClients(Array.from(clientMap.values()));
         setLoading(false);
+    };
+
+    // Helper to parse notes for the timeline
+    const parseItemDetails = (notes: string | undefined | null) => {
+        if (!notes) return { note: '', variants: [] };
+        try {
+            const parsed = JSON.parse(notes);
+            if (typeof parsed === 'object' && parsed !== null) {
+                return {
+                    note: parsed.note || '',
+                    variants: parsed.variants || []
+                };
+            }
+        } catch (e) {
+            return { note: notes, variants: [] };
+        }
+        return { note: notes, variants: [] };
     };
 
     useEffect(() => {
@@ -112,8 +148,7 @@ export default function ClientsPage() {
 
     // Filter
     const filteredClients = clients.filter(client =>
-        client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        client.phone.includes(searchQuery)
+        client.phone.includes(searchQuery.toLowerCase())
     );
 
     // Stats
@@ -240,19 +275,18 @@ export default function ClientsPage() {
                                 filteredClients.map((client) => {
                                     const isVip = client.totalSpent > 500; // Mock VIP logic
                                     return (
-                                        <tr key={client.id} className="group hover:bg-white/[0.02] transition-colors duration-300">
+                                        <tr key={client.id} onClick={() => setSelectedClientPhone(client.phone)} className="group hover:bg-white/[0.05] transition-colors duration-300 cursor-pointer">
                                             <td className="p-6">
                                                 <div className="flex items-center gap-4">
                                                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-lg shadow-lg relative overflow-hidden ${isVip ? 'bg-gradient-to-br from-amber-400 to-yellow-600' : 'bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/5'}`}>
                                                         {isVip && <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />}
-                                                        <span className="relative z-10">{client.name.charAt(0).toUpperCase()}</span>
+                                                        <span className="relative z-10">P</span>
                                                     </div>
                                                     <div>
                                                         <div className="flex items-center gap-2">
-                                                            <span className="font-bold text-lg text-white group-hover:text-teal-500 transition-colors">{client.name}</span>
+                                                            <span className="font-bold text-lg text-white group-hover:text-teal-500 transition-colors">{client.phone}</span>
                                                             {isVip && <span className="px-1.5 py-0.5 rounded bg-amber-500 text-[9px] font-black text-black uppercase tracking-wider">VIP</span>}
                                                         </div>
-                                                        <span className="text-zinc-500 text-xs font-mono mt-0.5 block">{client.phone}</span>
                                                     </div>
                                                 </div>
                                             </td>
@@ -302,6 +336,80 @@ export default function ClientsPage() {
                     </div>
                 </div>
             </div>
+            {/* Orders Modal for Selected Client */}
+            <Dialog open={!!selectedClientPhone} onOpenChange={(open) => { if (!open) setSelectedClientPhone(null); }}>
+                <DialogContent className="max-w-4xl bg-zinc-950 border-zinc-900 text-white max-h-[85vh] flex flex-col p-0 gap-0">
+                    <DialogHeader className="p-6 pb-2 border-b border-white/5 bg-zinc-900/50 backdrop-blur-xl sticky top-0 z-10">
+                        <div className="flex flex-col gap-1">
+                            <DialogTitle className="text-2xl font-black flex items-center gap-3">
+                                <User className="text-teal-500 w-6 h-6" />
+                                Client History: <span className="text-teal-400">{selectedClientPhone}</span>
+                            </DialogTitle>
+                            <p className="text-zinc-500 text-sm">All past orders from this phone number</p>
+                        </div>
+                    </DialogHeader>
+
+                    <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
+                        <div className="grid gap-4">
+                            {allOrders.filter(o => o.customer_phone?.toLowerCase().trim() === selectedClientPhone?.toLowerCase().trim()).map(order => (
+                                <Card key={order.id} className="bg-zinc-900/40 backdrop-blur-md border border-white/5 hover:border-teal-500/30 transition-all duration-300 overflow-hidden group">
+                                    <div className="p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+
+                                        {/* Left Area: Meta */}
+                                        <div className="flex flex-col gap-3 min-w-[200px]">
+                                            <div className="flex items-center gap-3">
+                                                <Badge variant="outline" className="border-teal-500/30 text-teal-400 bg-teal-500/10 font-mono">
+                                                    #{order.id.slice(0, 8)}
+                                                </Badge>
+                                                <Badge className={cn("border-0 font-bold", ['paid', 'completed'].includes(order.status) ? 'bg-emerald-500/10 text-emerald-400' : 'bg-blue-500/10 text-blue-400')}>
+                                                    <CheckCircle2 className="w-3 h-3 mr-1" />
+                                                    {order.status.toUpperCase()}
+                                                </Badge>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm text-zinc-400 font-medium flex items-center gap-2">
+                                                        <Clock className="w-4 h-4 text-teal-500" />
+                                                        {new Date(order.created_at).toLocaleString(undefined, {
+                                                            weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                                                        })}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Right Area: Action & Price */}
+                                        <div className="flex flex-col items-end justify-center">
+                                            <span className="text-sm font-semibold text-zinc-500 uppercase tracking-widest mb-1">Total Paid</span>
+                                            <div className="flex items-baseline gap-1">
+                                                <span className="text-xl font-normal text-teal-500">{currency}</span>
+                                                <span className="text-3xl font-black text-white tracking-tight">{Number(order.total_amount).toFixed(2)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-black/20 px-5 py-4 border-t border-white/5">
+                                        <span className="text-xs font-bold uppercase tracking-widest text-zinc-600 mb-2 block">Order Items</span>
+                                        <div className="text-sm text-zinc-300 font-medium leading-relaxed divide-y divide-white/5">
+                                            {order.order_items?.map((i: any) => {
+                                                // Assuming notes are stored correctly or fallback if they are complex json
+                                                // If order_items isn't populated with menu_items in the history view fetch, we might just show basic info
+                                                return (
+                                                    <div key={i.id} className="flex items-center justify-between py-2">
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="font-black text-teal-400 bg-teal-500/10 rounded px-2 py-0.5">{i.quantity}x</span>
+                                                            <span className="text-zinc-200">{i.menu_items?.name || 'Unknown Item'}</span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

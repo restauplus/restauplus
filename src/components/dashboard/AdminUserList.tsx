@@ -147,9 +147,25 @@ export function AdminUserList({ initialProfiles }: AdminUserListProps) {
 
                                     <div className="hidden md:block col-span-3">
                                         <div className="flex flex-col items-start gap-1">
-                                            <Badge variant="outline" className={`text-xs border-white/10 bg-black/50 ${profile.role === 'admin' ? 'text-purple-400 border-purple-500/30' : 'text-zinc-300'}`}>
-                                                {profile.role.toUpperCase()}
-                                            </Badge>
+                                            <div className="flex items-center gap-2">
+                                                <Badge variant="outline" className={`text-xs border-white/10 bg-black/50 ${profile.role === 'admin' ? 'text-purple-400 border-purple-500/30' : 'text-zinc-300'}`}>
+                                                    {profile.role.toUpperCase()}
+                                                </Badge>
+                                                {profile.plan_type && (
+                                                    <span className="text-[10px] text-zinc-500 border border-white/5 bg-white/5 px-1.5 py-0.5 rounded">
+                                                        {
+                                                            {
+                                                                restaurant_trial: '10 Days Trial',
+                                                                restaurant_monthly: 'Rest. Monthly',
+                                                                restaurant_yearly: 'Rest. Yearly',
+                                                                hotel_monthly: 'Hotel Monthly',
+                                                                hotel_6months: 'Hotel 6 Months',
+                                                                hotel_yearly: 'Hotel Yearly',
+                                                            }[profile.plan_type as string] || profile.plan_type
+                                                        }
+                                                    </span>
+                                                )}
+                                            </div>
                                             {profile.status === 'pending' && <span className="text-[10px] text-orange-400 font-bold flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" /> Pending Approval</span>}
                                             {profile.status === 'active' && <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active</span>}
                                             {profile.status === 'rejected' && <span className="text-[10px] text-red-400 font-bold flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-500" /> Revoked</span>}

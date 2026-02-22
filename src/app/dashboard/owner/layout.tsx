@@ -11,7 +11,7 @@ import { createClient } from "@/lib/supabase/client";
 import { MaintenanceScreen } from "@/components/dashboard/MaintenanceScreen";
 import { AnnouncementPopup } from "@/components/dashboard/AnnouncementPopup";
 import { WelcomeSplash } from "@/components/dashboard/WelcomeSplash";
-import { LanguageProvider, useLanguage } from "@/context/language-context";
+import { useLanguage } from "@/context/language-context";
 
 export default function OwnerDashboardLayout({
     children,
@@ -19,9 +19,7 @@ export default function OwnerDashboardLayout({
     children: React.ReactNode;
 }) {
     return (
-        <LanguageProvider>
-            <OwnerDashboardContent>{children}</OwnerDashboardContent>
-        </LanguageProvider>
+        <OwnerDashboardContent>{children}</OwnerDashboardContent>
     );
 }
 

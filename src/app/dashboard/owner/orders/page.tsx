@@ -42,7 +42,8 @@ export default async function OrdersPage() {
         .order('created_at', { ascending: false })
         .limit(50);
 
-    const metricsOrders = [...(activeOrders || []), ...(completedOrders || [])];
+    const allOrders = [...(activeOrders || []), ...(completedOrders || [])];
+    const metricsOrders = Array.from(new Map(allOrders.map(item => [item.id, item])).values());
 
     // 4. Fetch Restaurant Info
     const { data: restaurant } = await supabase
@@ -53,6 +54,28 @@ export default async function OrdersPage() {
 
     const currency = restaurant?.currency || 'USD';
 
+    // 5. Fetch Daily Stats (Total Dine In & Take Away for Today)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startOfDay = today.toISOString();
+
+    const { count: totalDineIn } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+        .eq('restaurant_id', profile.restaurant_id)
+        .gte('created_at', startOfDay)
+        .neq('status', 'cancelled')
+        .or('order_type.eq.dine_in,order_type.is.null');
+
+    const { count: totalTakeAway } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+        .eq('restaurant_id', profile.restaurant_id)
+        .gte('created_at', startOfDay)
+        .neq('status', 'cancelled')
+        .eq('order_type', 'takeaway');
+
+
     return (
         <div className="space-y-6 pt-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -61,7 +84,11 @@ export default async function OrdersPage() {
             </div>
 
             {/* Metrics Dashboard */}
-            <KitchenMetrics orders={metricsOrders} />
+            <KitchenMetrics
+                orders={metricsOrders}
+                totalDailyDineIn={totalDineIn || 0}
+                totalDailyTakeAway={totalTakeAway || 0}
+            />
 
             <OrderBoard
                 initialOrders={activeOrders || []}
